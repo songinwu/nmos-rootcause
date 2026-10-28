@@ -27,7 +27,7 @@ def test_table_shape():
 
 
 def test_predicted_unique_counts():
-    """표만 보고 한 예측 — 측정 11칸이면 23개, 기존 4칸이면 8개가 다른 원인과 겹치지 않는다."""
+    """표만 보고 한 예측 — 측정 12칸이면 23개, 기존 4칸이면 8개가 다른 원인과 겹치지 않는다."""
     assert sum(nk.predicted_unique().values()) == 23
     assert sum(nk.predicted_unique(group4=True).values()) == 8
 

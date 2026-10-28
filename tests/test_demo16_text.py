@@ -36,3 +36,15 @@ def test_nmos_scenarios_match_engine():
         assert all(set(r["steps"]) <= flow for r in s["ranking"])
         top = {r["cause_id"] for r in s["ranking"] if r["tied"]} or {s["ranking"][0]["cause_id"]}
         assert s["set_cause"] in top
+
+
+def test_nmos_magnitude_scenarios():
+    """「얼마나」 시나리오 — 넣은 파라미터 하나만 「밖이고 맞는」 줄이고, 엔진 1순위 카드에 크기가 붙는다."""
+    d = json.load(open("data/demo/nmos_scenarios.json", encoding="utf-8"))
+    planted = [s for s in d["scenarios"] if s.get("planted")]
+    assert len(planted) >= 4
+    for s in planted:
+        assert [r["param"] for r in s["fingerprint"] if r["explains"]] == [s["planted"]["param"]]
+        e = s["magnitude"][s["set_cause"]]
+        assert e["out_of_range"] and e["consistent"]
+    assert all(c.get("kind") in ("전기 값", "여유", "결함 밀도", "장비 변수") for c in d["card"].values())

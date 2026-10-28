@@ -1,13 +1,21 @@
 """
 원인 공정 추천 — NMOS 지식표 (2026-10-28 초안, wiki 「NMOS 원인 공정 지식표 — 조원 설명용」 2판의 코드판).
 
-목표는 「38단계 중 하나가 잘못됐을 때 웨이퍼맵 모양 + 칩별 측정으로 바로 짚기」다. 엔진은 문헌 CMOS KB와 같고
+목표는 「41단계 중 하나가 잘못됐을 때 웨이퍼맵 모양 + 칩별 측정으로 바로 짚기」다. 엔진은 문헌 CMOS KB와 같고
 (rootcause_kb.score_batch에 이 모듈의 prior · q를 넘긴다) 검사 칸과 원인 표만 다르다.
 
-    무엇을 만드나 : P형 (100) 기판 위 NMOS 하나 — STI · LDD 없음 · salicide · W contact · Al metal 1 (마스크 5장)
-    공정 흐름     : IDEC 0.5 µm CMOS 108스텝에서 NMOS 부분만 + STI(KSIA §2.7) — 38단계 (STEPS)
-    검사 칸 11개  : 칩마다 재는 측정 9가지(WAT 방식)에서 Vt를 높음 · 낮음으로 나눈 것. 칩은 가장 크게 벗어난
-                    측정 하나로 판정한다. BIN_GROUP4로 기존 4칸(끊김 · 누설 · 문턱 이탈 · 전류 부족)에 묶인다.
+    무엇을 만드나 : P형 (100) 기판 위 NMOS 하나 — STI · LDD 없음 · salicide · W contact · Al metal 1 (마스크 6장 — *2026-10-28* SAB 추가)
+    공정 흐름     : IDEC 0.5 µm CMOS 108스텝에서 NMOS 부분만 + STI(KSIA §2.7) — 38단계에 SAB 3단계(26a ~ 26c)를
+                    끼워 41단계 (STEPS). 기존 번호를 지키려고 끼운 단계만 a · b · c를 붙인다
+    검사 칸 12개  : 칩마다 재는 측정 9가지(WAT 방식)에서 Vt를 높음 · 낮음으로, 면저항을 패턴 셋(silicide를 막은
+                    S/D · 막은 poly · silicide 덮인 곳)으로 나눈 것. 칩은 가장 크게 벗어난 측정 하나로 판정한다.
+                    BIN_GROUP4로 기존 4칸(끊김 · 누설 · 문턱 이탈 · 전류 부족)에 묶인다.
+
+*(2026-10-28 SAB)* silicide가 S/D · poly를 덮으면 면저항을 17 ~ 57배 낮춰(MOSIS T7CZ 실측) S/D 주입 · RTA · poly 도핑
+이상이 면저항에 거의 안 보인다 — 공개 공정처럼 silicide 막는 층(SAB)으로 막은 시험 패턴을 두고, silicide 덮인 패턴은
+따로 잰다(근거: wiki 원인공정추천-문헌근거-후보표 §6-1). 이에 맞춰 원인 넷의 측정 방향을 고쳤다 —
+24 S/D 주입 · 26 RTA: 막은 S/D 면저항만(0.5 µm면 S/D 직렬 저항이 채널 저항보다 훨씬 작아 on 전류엔 거의 안 보인다 — 원리),
+27 salicide 온도: silicide 면저항(Clevenger 1994), 20 poly 도핑: 막은 poly 면저항 + Vt + on 전류(poly 공핍).
 
 ⚠️ 한계
 - 원인 40개 중 문헌 원문 사례가 직접 있는 것은 18개(evidence 「원문」 16 · 「일부」 2), 다른 공정 사례를 옮긴 것 4개
@@ -27,24 +35,28 @@ from src.inference import rootcause_kb as kb
 
 PATTERNS = kb.PATTERNS
 BIN_TYPES = ["open", "gate_leak", "junction_leak", "iso_leak", "metal_leak",
-             "vt_high", "vt_low", "ss", "ion_low", "rs_sd", "rs_poly"]
+             "vt_high", "vt_low", "ss", "ion_low", "rs_sd", "rs_poly", "rs_sil"]
 BIN_LABELS = {
     "open": "연결 끊김", "gate_leak": "gate 누설", "junction_leak": "접합 · off 누설", "iso_leak": "분리 누설",
     "metal_leak": "배선 누설", "vt_high": "Vt 높음", "vt_low": "Vt 낮음", "ss": "SS 기울기 큼",
-    "ion_low": "on 전류 부족", "rs_sd": "S/D 면저항 큼", "rs_poly": "poly 면저항 큼",
+    "ion_low": "on 전류 부족", "rs_sd": "S/D 면저항 큼", "rs_poly": "poly 면저항 큼", "rs_sil": "silicide 면저항 큼",
 }
 BIN_GROUP4 = {"open": "끊김", "gate_leak": "누설", "junction_leak": "누설", "iso_leak": "누설", "metal_leak": "누설",
               "vt_high": "문턱 이탈", "vt_low": "문턱 이탈", "ss": "문턱 이탈",
-              "ion_low": "전류 부족", "rs_sd": "전류 부족", "rs_poly": "전류 부족"}
+              "ion_low": "전류 부족", "rs_sd": "전류 부족", "rs_poly": "전류 부족", "rs_sil": "전류 부족"}
 GROUP4 = ["끊김", "누설", "문턱 이탈", "전류 부족"]
 B = len(BIN_TYPES)
 
-STEPS = {f"{i:02d}": n for i, n in enumerate([
-    "입고", "세정", "pad oxide", "질화막 증착", "활성 영역 포토", "질화막 · pad 식각", "trench 식각", "PR 제거",
-    "liner 산화", "trench 채우기", "치밀화 열처리", "STI CMP", "질화막 제거", "pad oxide 제거", "screen oxide",
-    "Vt 주입", "screen oxide 제거", "세정", "gate 산화", "poly 증착", "gate 포토", "poly 식각", "PR 제거",
-    "S/D 주입", "spacer", "활성화 RTA", "salicide", "ILD 증착", "ILD CMP", "contact 포토", "contact 식각",
-    "PR 제거", "TiN + W", "W CMP", "metal 1", "보호막 · pad", "forming gas", "EDS"], start=1)}
+STEPS = {}
+for _i, _n in enumerate([
+        "입고", "세정", "pad oxide", "질화막 증착", "활성 영역 포토", "질화막 · pad 식각", "trench 식각", "PR 제거",
+        "liner 산화", "trench 채우기", "치밀화 열처리", "STI CMP", "질화막 제거", "pad oxide 제거", "screen oxide",
+        "Vt 주입", "screen oxide 제거", "세정", "gate 산화", "poly 증착", "gate 포토", "poly 식각", "PR 제거",
+        "S/D 주입", "spacer", "활성화 RTA", "salicide", "ILD 증착", "ILD CMP", "contact 포토", "contact 식각",
+        "PR 제거", "TiN + W", "W CMP", "metal 1", "보호막 · pad", "forming gas", "EDS"], start=1):
+    STEPS[f"{_i:02d}"] = _n
+    if _i == 26:   # 2026-10-28 silicide 막는 층(SAB) — 활성화 RTA 뒤 · salicide 앞. 기존 번호를 지키려고 a · b · c
+        STEPS.update({"26a": "SAB 산화막 증착", "26b": "SAB 포토", "26c": "SAB 식각 · PR 제거"})
 
 
 @dataclass(frozen=True)
@@ -78,15 +90,19 @@ CAUSES = [
     C("n17_screen_residue", "screen oxide 잔막", ("17",), "gate 산화막이 두꺼워짐", ("vt_high", "ion_low"), "near-full", "원리", "—"),
     C("n18_rinse_charge", "gate 앞 세정 헹굼 정전기", ("18",), "물 헹굼 마찰 전기 → 산화막 약화", ("gate_leak",), "center", "원문", "Lin 2012 (N05)"),
     C("n19_gox_thick", "gate 산화 두께 이탈", ("19",), "시간 · 온도 이탈 → 두꺼워짐", ("vt_high", "ion_low"), "near-full", "원문", "Stapper 1983 (N14)"),
-    C("n20_poly_doping", "poly 도핑 부족", ("20",), "poly 공핍", ("rs_poly", "vt_high"), "near-full", "원리", "—"),
+    C("n20_poly_doping", "poly 도핑 부족", ("20",), "poly 공핍", ("rs_poly", "vt_high", "ion_low"), "near-full", "원리",
+      "— · 측정: 막은 poly 저항 (덮인 poly로는 안 보임 — Clevenger 1994)"),
     C("n21a_gate_focus", "gate 포토 가장자리 초점", ("21",), "gate 길이 변함", ("vt_high", "ion_low"), "edge-ring", "일부", "TI 특허 · Goh (N02)"),
     C("n21b_develop_residue", "gate 포토 현상 찌꺼기", ("21",), "헹굼물 오염 → PR 재부착", ("metal_leak", "open"), "donut", "원문", "Ng 2009 (N17)"),
     C("n22_poly_overetch", "poly 식각 가장자리 과식각", ("22",), "gate 산화막 손상 (edge ring)", ("gate_leak",), "edge-ring", "강의", "KSIA 선택비 · Chai · Brady 옮김"),
     C("n23_gate_ash_charge", "gate 뒤 ashing 대전", ("23",), "poly 안테나로 대전 손상", ("gate_leak",), "center", "옮김", "Chen 2000"),
-    C("n24_sd_dose", "S/D 주입 도즈 이탈", ("24",), "도즈 · 에너지 이탈", ("rs_sd", "ion_low"), "near-full", "원문", "Stapper 1983"),
+    C("n24_sd_dose", "S/D 주입 도즈 이탈", ("24",), "도즈 · 에너지 이탈", ("rs_sd",), "near-full", "원문",
+      "Stapper 1983 · 측정: Akheyar 2002 · Biesemans 1997"),
     C("n25_spacer_thin", "spacer 얇음 (salicide 다리)", ("25",), "gate와 S/D가 TiSi2로 이어짐", ("gate_leak", "open"), "near-full", "원리", "일반 지식"),
-    C("n26_rta_edge", "활성화 RTA 가장자리 온도", ("26",), "가장자리 활성화 부족", ("rs_sd", "ion_low"), "edge-ring", "원문", "Hansen · Micron (N01)"),
-    C("n27_salicide_temp", "salicide 열처리 온도 이탈", ("27",), "고저항 상", ("rs_sd", "rs_poly"), "near-full", "강의", "KSIA salicide"),
+    C("n26_rta_edge", "활성화 RTA 가장자리 온도", ("26",), "가장자리 활성화 부족", ("rs_sd",), "edge-ring", "원문",
+      "Hansen · Micron (N01) · 측정: Riley 1996"),
+    C("n27_salicide_temp", "salicide 열처리 온도 이탈", ("27",), "C49 → C54 전이 부족 → 고저항 상", ("rs_sil",), "near-full",
+      "일부", "KSIA salicide · Clevenger 1994"),
     C("n28_ild_particle", "ILD 챔버 입자", ("28",), "입자 낙하", ("metal_leak", "open"), "loc", "원문", "Hansen · Stapper (N09)"),
     C("n29_ild_cmp_edge", "ILD CMP 가장자리 두께", ("29",), "가장자리 ILD 두꺼움 → contact 안 열림", ("open",), "edge-ring", "원문", "Goh 2001 (N04)"),
     C("n30_contact_barc", "contact 반사방지막 두꺼움", ("30",), "BT 부족 → 3 · 7시 안 열림", ("open",), "edge-loc", "원문", "Liu 2019 (N07)"),
@@ -103,6 +119,7 @@ CAUSES = [
     C("c_cleanroom", "클린룸 입자", (), "입자 밀도 증가", ("metal_leak", "open"), "random", "원문", "Hansen · Stapper (N10)"),
 ]
 UNOBSERVABLE = {"03": "pad oxide 두께 — 칩 측정에 거의 안 나타남, 공정 중 두께 측정으로만"}
+NO_CAUSE_YET = {k: "SAB 단계의 사고(잔막 → silicide가 일부 안 생김)는 아직 표에 없음" for k in ("26a", "26b", "26c")}
 
 K = len(CAUSES)
 CAUSE_IDS = [c.id for c in CAUSES]
@@ -118,7 +135,7 @@ assert all(PATTERN_CANDIDATES[p] for p in PATTERNS[1:]), "후보가 없는 패�
 # 칸이 11개라 CMOS KB(4칸, 주 1.5)보다 주 logit을 키워 주 칸 몫을 비슷하게 맞춘다 — 주 하나면 약 50%
 LOGIT_PRIMARY = 2.5
 SIGMA = kb.DIRECTION_SIGMA
-CHI2_90 = 15.987        # χ²(df = 10) 90백분위 — 「무작위와 구별되나」 기준 (CMOS KB는 df = 3의 6.251)
+CHI2_90 = 17.275        # χ²(df = 11) 90백분위 — 「무작위와 구별되나」 기준 (CMOS KB는 df = 3의 6.251)
 
 
 def direction_logits(c: NCause) -> np.ndarray:

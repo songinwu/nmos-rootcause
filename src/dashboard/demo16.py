@@ -14,8 +14,11 @@
 
 MOSCAP은 data/demo/moscap_scenarios.json(scripts/make_moscap_scenarios.py — 실제 맵 · CNN 실제 추론 · 합성 bin ·
 MOSCAP 지식표 순위 · 화면 문구)을, CMOS는 진단 API(/demo/rootcause/{id} — 섹션 14와 같은 엔진)를 읽는다.
-NMOS *(2026-10-28)* 는 data/demo/nmos_scenarios.json(scripts/make_nmos_scenarios.py — 38단계 · 측정 11칸 · 원인 40개)을
+NMOS *(2026-10-28)* 는 data/demo/nmos_scenarios.json(scripts/make_nmos_scenarios.py — 41단계(38 + SAB 3) · 측정 12칸 · 원인 40개)을
 읽는다. 칸이 11개라 색을 시나리오 파일에서 받고, 만드는 순서는 38줄 대신 공정 묶음 7개에 단계 칩으로 보인다.
+*(2026-10-28 보강 — 「얼마나」)* NMOS는 ② 단계에 웨이퍼 WAT 값(Vt · SS · on 전류 · C-V 산화막)을 같이 보이고, ③ 엔진 칸에
+「얼마나 — 어느 파라미터가 얼마나 · 90% 범위 · 정상 범위 · 다른 측정과 맞나」를 붙인다. 크기를 못 재는 원인은 왜 못 재는지
+(유형)를 보인다. 계산은 scripts/make_nmos_scenarios.py가 src/inference/nmos_device.py로 미리 해 JSON에 담는다.
 대시보드는 src.inference를 import하지 않는다.
 """
 import json
@@ -37,7 +40,7 @@ except ImportError:          # app.py와 같은 폴백 — streamlit을 src/dash
 API_URL = os.getenv("API_URL", "http://localhost:8000")
 MOSCAP_PATH = "data/demo/moscap_scenarios.json"
 NMOS_PATH = "data/demo/nmos_scenarios.json"
-WORLDS = {"moscap": "우리가 만든 MOSCAP", "cmos": "CMOS 문헌 사례", "nmos": "NMOS 38단계"}
+WORLDS = {"moscap": "우리가 만든 MOSCAP", "cmos": "CMOS 문헌 사례", "nmos": "NMOS 41단계"}
 JSON_PATH = {"moscap": MOSCAP_PATH, "nmos": NMOS_PATH}
 PAT_KO = {"none": "정상", "center": "가운데", "donut": "도넛", "edge-loc": "가장자리 일부",
           "edge-ring": "가장자리 링", "loc": "한 곳에 뭉침", "near-full": "거의 전체",
@@ -147,15 +150,17 @@ def _view_nmos(sid):
     for rk, r in zip(ranks, sc["ranking"]):
         steps = r["steps"]     # 공통 원인(CMP 긁힘)은 여러 단계, 로봇 · 클린룸은 단계 없음
         ranking.append(dict(rank=rk, tied=r["tied"], step=steps[0] if steps else None, steps=steps,
-                            step_name=" · ".join(f"{int(k)}. {step_name[k]}" for k in steps) or "전 공정 공통",
+                            step_name=" · ".join(f"{_n(k)}. {step_name[k]}" for k in steps) or "전 공정 공통",
+                            cause_id=r["cause_id"], mag=sc.get("magnitude", {}).get(r["cause_id"]),
                             **card[r["cause_id"]]))
     ev = [c["evidence"] for c in card.values()]
     n_src, n_moved = sum(e in ("원문", "일부") for e in ev), ev.count("옮김")
     return dict(
         world="nmos", id=sid, title=sc["title"], story=sc["story"],
-        banner=("NMOS 트랜지스터 — 38단계 · 마스크 5장으로 짠 공정",
-                "P형 기판 · STI 분리 · LDD 없음 · salicide · W contact · Al 배선 1층 · 맵은 실제 공장 웨이퍼(WM-811K) · "
-                "칸 하나 = 칩 하나 · 칩마다 측정 9가지(WAT 방식, Vt는 높음 · 낮음으로 나눠 11칸)"),
+        banner=("NMOS 트랜지스터 — 41단계(38 + SAB 3) · 마스크 6장으로 짠 공정",
+                "P형 기판 · STI 분리 · LDD 없음 · salicide(SAB로 시험 패턴만 막음) · W contact · Al 배선 1층 · "
+                "맵은 실제 공장 웨이퍼(WM-811K) · 칸 하나 = 칩 하나 · 칩마다 측정 9가지(Vt는 높음 · 낮음, 면저항은 "
+                "패턴 셋으로 나눠 12칸)"),
         flow=[(k, n, "", True) for k, n in d["flow"]], groups=d["groups"],
         die_map=sc["die_map"], bins=d["bin_types"], bin_plain=d["bin_plain"], bin_test=d["bin_plain_test"],
         colors=d["colors"], counts=sc["bin_counts"],
@@ -163,8 +168,11 @@ def _view_nmos(sid):
         ranking=ranking, note=sc.get("note"), injected=card[sc["set_cause"]]["this"], lot=sc["source"]["lot"],
         hit=any(rk == 1 and r["cause_id"] == sc["set_cause"] for rk, r in zip(ranks, sc["ranking"])),
         n_cause=len(card), bin_rule="가장 크게 벗어난 측정",
+        wat=sc.get("wat"), wat_spec=d.get("wat_spec"), planted=sc.get("planted"),
+        magnitude=sc.get("magnitude", {}), fingerprint=sc.get("fingerprint", []), set_cause=sc["set_cause"],
         chips=[("맵", "WM-811K 실측", True), ("모양 판정", "CNN 실제 추론", True),
-               ("측정 결과", "합성 (지식표 방향)", False), ("공정 순서", "IDEC 0.5 µm + KSIA STI", True),
+               ("측정 결과", "합성 (지식표 방향)", False), ("WAT 값", "합성 (MOS 식)", False),
+               ("공정 순서", "IDEC 0.5 µm + KSIA STI", True),
                ("원인 표", f"{len(card)}개 — 문헌 원문 {n_src} · 옮김 {n_moved} · 강의 · 원리 {len(card) - n_src - n_moved}",
                 False)])
 
@@ -173,6 +181,82 @@ def _view_nmos(sid):
 
 def _colors(v):
     return v.get("colors", BIN_COLORS)
+
+
+WAT_ORDER = ["Vt", "SS", "ion", "tox_cv", "rs_sd", "rs_poly", "rs_sil"]
+
+
+def _n(k):
+    """단계 번호 — 「03」 → 「3」, 끼운 단계 「26a」는 그대로."""
+    return k.lstrip("0") or k
+
+
+def _wat_cells(v):
+    """WAT 값 네 줄 — (이름, 이번, 기준, 합격선, 벗어났나)."""
+    w, ws = v["wat"]["meas"], v["wat_spec"]
+    base, spec = ws["base"], ws["spec"]
+    out = []
+    for k in WAT_ORDER:
+        if k not in w:
+            continue
+        x = w[k]
+        if k == "Vt":
+            now, ref, rng_ = f"{x:.2f} V", f"{base[k]:.2f} V", f"{spec[k][0]:.2f} ~ {spec[k][1]:.2f} V"
+            bad = not v["wat"]["in_spec"][k]
+        elif k == "SS":
+            now, ref, rng_ = f"{x:.0f} mV/dec", f"{base[k]:.0f}", f"{spec[k][1]:.0f} 이하"
+            bad = not v["wat"]["in_spec"][k]
+        elif k == "ion":
+            now, ref, rng_ = f"{(x - 1) * 100:+.0f}%", "기준", f"{(spec[k][0] - 1) * 100:+.0f} ~ {(spec[k][1] - 1) * 100:+.0f}%"
+            bad = not v["wat"]["in_spec"][k]
+        elif k == "tox_cv":
+            lo, hi = ws["tox_range"]
+            now, ref, rng_ = f"{x:.0f} Å", f"{base[k]:.0f} Å", f"정상 {lo:.0f} ~ {hi:.0f} Å"
+            bad = not (lo <= x <= hi)
+        else:   # 면저항 셋 — silicide 덮인 곳은 값이 작아 소수 둘째 자리까지
+            lo, hi = spec[k]
+            d = 2 if base[k] < 10 else 0
+            now, ref = f"{x:.{d}f} Ω/sq", f"{base[k]:.{d}f}"
+            rng_ = f"{lo:.{d}f} ~ {hi:.{d}f}" if lo is not None else f"{hi:.{d}f} 이하"
+            bad = not v["wat"]["in_spec"][k]
+        out.append((ws["label"][k], now, ref, rng_, bad))
+    return out
+
+
+def _wat_table(v):
+    rows = "".join(
+        f'<tr><td style="padding:3px 8px;color:{ui.INK_MUTED};">{n}</td>'
+        f'<td style="padding:3px 8px;font-weight:700;color:{"#E85D5D" if bad else ui.INK};">{now}{" ⚠" if bad else ""}</td>'
+        f'<td style="padding:3px 8px;color:{ui.INK_MUTED};">{ref}</td><td style="padding:3px 8px;color:{ui.INK_MUTED};">{r}</td></tr>'
+        for n, now, ref, r, bad in _wat_cells(v))
+    st.markdown(f'<table style="width:100%;border-collapse:collapse;font-size:13px;border:1px solid {ui.BORDER};">'
+                f'<tr style="color:{ui.INK_MUTED};font-size:11.5px;"><td style="padding:3px 8px;">측정</td>'
+                f'<td style="padding:3px 8px;">이번</td><td style="padding:3px 8px;">기준</td>'
+                f'<td style="padding:3px 8px;">합격선</td></tr>{rows}</table>', unsafe_allow_html=True)
+
+
+def _wat_line(v):
+    """③ 왼쪽 — WAT 값 중 합격선 밖인 것만 (일곱 개를 다 늘어놓으면 줄이 넘친다)."""
+    cells = _wat_cells(v)
+    bad = [f'<span style="color:#E85D5D;">{n} {now}</span>' for n, now, _, _, b in cells if b]
+    txt = (" · ".join(bad) + f" · 나머지 {len(cells) - len(bad)}개 정상") if bad else "전부 합격선 안"
+    st.markdown(f'<div style="font-size:12.5px;color:{ui.INK_MUTED};margin-top:2px;">WAT — {txt}</div>',
+                unsafe_allow_html=True)
+
+
+def _mag_line(r):
+    """③ 엔진 칸의 「얼마나」 한 줄 — 크기를 재는 원인이면 크기 · 90% 범위 · 정상 범위 · 다른 측정과 맞나, 아니면 왜 못 재나."""
+    mg = r.get("mag")
+    if not mg:
+        return (f'<div style="color:{ui.INK_MUTED};font-size:12px;margin-top:3px;">{r.get("kind_note", "")} '
+                f'<span style="font-size:11px;">(유형: {r.get("kind", "—")})</span></div>')
+    if not mg["out_of_range"]:
+        head = f'{mg["label"]} {mg["value"]} — 정상 범위({mg["normal"]}) 안이라 이 파라미터는 아니에요'
+        return f'<div style="color:{ui.INK_MUTED};font-size:12.5px;margin-top:3px;">얼마나 — {head}</div>'
+    cons = ("다른 측정도 맞아요 ✓" if mg["consistent"] else f'안 맞는 측정 — {" · ".join(mg["mismatch"])} ✗')
+    return (f'<div style="color:{ui.INK_MUTED};font-size:12.5px;margin-top:3px;">얼마나 — '
+            f'<b style="color:{ui.ACCENT};font-size:14px;">{mg["label"]} 약 {mg["value"]}</b> '
+            f'<span>(90% {mg["lo"]} ~ {mg["hi"]})</span><br>정상 {mg["normal"]} 밖 · {mg["from"]} 값으로 계산 · {cons}</div>')
 
 
 def _rank_label(r):
@@ -213,7 +297,7 @@ def _map(v, key, binned=True):
 
 
 def _bins(v, key, top=None):
-    """칸이 4개면 검사 순서대로, 많으면(NMOS 11칸) 많은 순으로 — top을 주면 상위 top개 + 「그 밖」 한 줄."""
+    """칸이 4개면 검사 순서대로, 많으면(NMOS 12칸) 많은 순으로 — top을 주면 상위 top개 + 「그 밖」 한 줄."""
     cnt = v["counts"]
     tot = max(sum(cnt.values()), 1)
     col = dict(zip(v["bins"], _colors(v)))
@@ -274,19 +358,19 @@ def _flow_groups(v):
                 col = RANK_COLOR[min(r["rank"] - 1, 2)]
                 chips.append(f'<span style="border:2px solid {col};background:#1E2632;color:{ui.INK};font-weight:700;'
                              f'font-size:12.5px;padding:1px 7px;border-radius:7px;margin:2px 3px 2px 0;display:inline-block;">'
-                             f'{int(k)}. {name[k]} <span style="background:{col};color:#0D1319;font-size:10.5px;'
+                             f'{_n(k)}. {name[k]} <span style="background:{col};color:#0D1319;font-size:10.5px;'
                              f'padding:0 5px;border-radius:8px;">{_rank_label(r)}</span></span>')
             else:
                 chips.append(f'<span style="color:{ui.INK_MUTED};font-size:11.5px;padding:0 3px;margin:1px 2px 1px 0;'
-                             f'display:inline-block;">{int(k)} {name[k]}</span>')
+                             f'display:inline-block;">{_n(k)} {name[k]}</span>')
         dim = "" if lit else "opacity:.55;"
         out.append(f'<div style="border-left:2px solid {RANK_COLOR[0] if lit else ui.BORDER};padding:2px 0 3px 8px;'
                    f'margin:3px 0;{dim}"><div style="color:{ui.INK};font-size:12.5px;font-weight:600;">{g} '
-                   f'<span style="color:{ui.INK_MUTED};font-weight:400;font-size:11px;">{int(a)}{f"–{int(b)}" if b != a else ""}</span></div>'
+                   f'<span style="color:{ui.INK_MUTED};font-weight:400;font-size:11px;">{_n(a)}{f"–{_n(b)}" if b != a else ""}</span></div>'
                    f'<div style="line-height:1.55;">{"".join(chips)}</div></div>')
     if not v["ranking"][0]["steps"]:
         out.append(f'<div style="color:{ui.INK_MUTED};font-size:12px;">1순위는 특정 단계가 아니라 전 공정 공통이에요.</div>')
-    st.markdown(f'<div style="color:{ui.INK_MUTED};font-size:12.5px;margin-bottom:2px;">만드는 순서 38단계 — '
+    st.markdown(f'<div style="color:{ui.INK_MUTED};font-size:12.5px;margin-bottom:2px;">만드는 순서 {len(v["flow"])}단계 — '
                 f'의심 단계에 불이 들어와요</div>' + "".join(out), unsafe_allow_html=True)
 
 
@@ -339,6 +423,26 @@ def _why_dialog(world, sid):
             st.caption(f"근거 — {r['source']}")
         if k == 0 and world == "moscap":
             _cv_plot(v)
+    if world == "nmos" and v.get("fingerprint"):
+        st.markdown("---")
+        st.markdown("**파라미터를 하나씩 의심해 보면** — 이번 WAT 값으로 계산한 크기, 그리고 그 크기면 나와야 할 다른 측정이 "
+                    "이번과 맞나. 「정상 범위 밖이고 다른 측정도 맞는」 줄이 이번 일을 설명해요.")
+        rows = "".join(
+            f'<tr style="{"background:#1E2A22;" if f["explains"] else ""}">'
+            f'<td style="padding:4px 8px;">{f["label"]}</td>'
+            f'<td style="padding:4px 8px;"><b>{f["value"]}</b> <span style="color:{ui.INK_MUTED};font-size:11.5px;">'
+            f'({f["lo"]} ~ {f["hi"]})</span></td>'
+            f'<td style="padding:4px 8px;color:{ui.INK_MUTED};">{f["normal"]}</td>'
+            f'<td style="padding:4px 8px;">{"밖" if f["out_of_range"] else "안"}</td>'
+            f'<td style="padding:4px 8px;">{"✓ 맞음" if f["consistent"] else "✗ " + " · ".join(f["mismatch"])}</td></tr>'
+            for f in v["fingerprint"])
+        st.markdown(f'<table style="width:100%;border-collapse:collapse;font-size:13px;">'
+                    f'<tr style="color:{ui.INK_MUTED};font-size:11.5px;"><td style="padding:4px 8px;">파라미터</td>'
+                    f'<td style="padding:4px 8px;">이번 값으로 계산한 크기 (90%)</td><td style="padding:4px 8px;">정상 범위</td>'
+                    f'<td style="padding:4px 8px;">범위</td><td style="padding:4px 8px;">다른 측정과</td></tr>{rows}</table>',
+                    unsafe_allow_html=True)
+        st.caption("산화막은 C-V 값, 채널 · poly 도핑은 Vt, 계면 트랩은 SS에서 거꾸로 풀었어요. 식은 장채널 MOS 식(교과서)이고, "
+                   "같은 식으로 합성한 값이라 범위는 「식이 맞다면」의 상한이에요.")
 
 
 @st.dialog("정답 공개 — 이 웨이퍼에 넣은 사고", width="large")
@@ -355,8 +459,22 @@ def _answer_dialog(world, sid):
                                   if len(group) > 1 else "엔진의 1순위와 같아요."), icon="✅")
     else:
         st.warning("넣은 사고가 엔진의 1순위에 없어요.", icon="⚠️")
-    st.info("엔진은 「어느 단계에서 · 어느 방향으로」까지만 말해요. 「이번에 몇 도였다」 같은 조건값은 맵과 검사 결과에 "
-            "들어 있지 않아서, 장비 기록을 봐야 알 수 있어요 — 그래서 엔진 결론과 따로 보여요.", icon="ℹ️")
+    pl = v.get("planted")
+    if pl:
+        e = v["magnitude"].get(v["set_cause"])
+        st.markdown(f"**넣은 크기** — {pl['label']} {pl['value']} (정상 {pl['normal']})")
+        if e:
+            st.markdown(f"**엔진이 계산한 크기** — {e['label']} 약 {e['value']} (90% {e['lo']} ~ {e['hi']})")
+        if pl.get("inside") is False:
+            st.info(f"넣은 크기가 이번엔 90% 범위 밖이에요. 90% 범위는 10번에 1번꼴로 놓치는데(웨이퍼 150장 시험에서 적중 "
+                    f"90 ~ 92%), 이번 웨이퍼는 {pl['nuisance']}가 정상 산포의 끝(±{pl['nuisance_z']:.1f}σ)에 있었어요.",
+                    icon="🎲")
+    if world == "nmos":
+        st.info("엔진은 「어느 단계의 · 어느 파라미터가 · 얼마나」(산화막 몇 Å 같은 소자 값)까지 말해요. 「산화로가 몇 °C · 몇 분"
+                "이었나」 같은 장비 설정은 같은 두께를 만드는 조합이 여러 개라 정하지 않고, 장비 기록으로 넘겨요.", icon="ℹ️")
+    else:
+        st.info("엔진은 「어느 단계에서 · 어느 방향으로」까지만 말해요. 「이번에 몇 도였다」 같은 조건값은 맵과 검사 결과에 "
+                "들어 있지 않아서, 장비 기록을 봐야 알 수 있어요 — 그래서 엔진 결론과 따로 보여요.", icon="ℹ️")
     st.caption("검사 결과(bin)는 이 사고에서 합성했어요 — WM-811K에는 검사 결과가 없어요.")
 
 
@@ -404,7 +522,8 @@ def _engine(v):
             f'{r["suspect"]}</div>'
             f'<div style="color:{ui.INK_MUTED};font-size:12.5px;">정상이면 — <span style="color:{ui.INK};">{r["normal"]}</span></div>'
             f'<div style="color:{ui.INK_MUTED};font-size:12.5px;margin-top:2px;">먼저 확인할 것 — '
-            f'<span style="color:{ui.INK};">{" · ".join(r["checks"])}</span></div>')
+            f'<span style="color:{ui.INK};">{" · ".join(r["checks"])}</span></div>'
+            + (_mag_line(r) if v["world"] == "nmos" else ""))
     st.markdown(
         f'<div style="border:1px solid {ui.BORDER};background:{ui.SURFACE};border-radius:10px;padding:8px 14px 10px;">'
         f'<div style="color:{ui.INK_MUTED};font-size:12.5px;">③ 엔진이 말하는 것</div>'
@@ -454,10 +573,12 @@ def _stage_lines(v, step):
             "검사 종류별로 세기" + (f" ({len(v['bins'])}칸)" if v["world"] == "nmos" else ""),
             "한쪽으로 쏠렸나 — 고르게 섞였으면 검사 결과는 버리고 모양만 씀"]
     n_cause = v.get("n_cause") or (14 if v["world"] == "moscap" else 17)
-    return "먼저 볼 공정을 고르는 중…", [
-        f"원인 후보 {n_cause}개 중 이 모양을 만드는 것만 남기기 (문헌·실습 기록)",
-        "후보마다 「이 공정이 틀어지면 나올 검사 결과」와 이번 결과를 비교",
-        "가장 잘 맞는 순서로 줄 세우기 — 검사 결과로 안 갈리면 공동 순위"]
+    lines = [f"원인 후보 {n_cause}개 중 이 모양을 만드는 것만 남기기 (문헌·실습 기록)",
+             "후보마다 「이 공정이 틀어지면 나올 검사 결과」와 이번 결과를 비교",
+             "가장 잘 맞는 순서로 줄 세우기 — 검사 결과로 안 갈리면 공동 순위"]
+    if v["world"] == "nmos" and v.get("wat"):
+        lines.append("1순위의 파라미터가 얼마나 벗어났나 — WAT 값을 MOS 식으로 거꾸로 계산, 정상 산포로 90% 범위")
+    return "먼저 볼 공정을 고르는 중…", lines
 
 
 def _done_label(v, step):
@@ -525,7 +646,13 @@ def _step2(v):
         _bins(v, key="d16_bins2")
         if v["world"] == "nmos":
             st.caption("칩마다 측정 9가지를 다 재고, **가장 크게 벗어난 측정 하나가 그 칩의 결과**가 돼요. "
-                       "모양이 후보를 좁히고, 이 결과가 그중에서 골라요 — 칸이 11개라 기존 4칸보다 잘게 갈라요.")
+                       f"모양이 후보를 좁히고, 이 결과가 그중에서 골라요 — 칸이 {len(v['bins'])}개라 기존 4칸보다 잘게 갈라요.")
+            if v.get("wat"):
+                st.markdown("#### 웨이퍼 WAT 값 — 「얼마나」를 잴 재료")
+                _wat_table(v)
+                st.caption(f"scribe line 시험 패턴 — {v['wat'].get('where', '웨이퍼 중앙값')}이에요. 면저항은 SAB로 "
+                           "silicide를 막은 패턴과 덮인 패턴을 따로 재요. 칩 결과(위)가 「어느 단계」를 고르고, 이 값이 "
+                           "「얼마나」를 말해요. 이번 값은 MOS 식으로 합성했어요.")
         else:
             st.caption("검사는 위에서부터 순서대로 하고, **처음 걸린 검사가 그 칸의 결과**가 돼요. "
                        "모양이 후보를 좁히고, 이 결과가 그중에서 골라요.")
@@ -545,6 +672,8 @@ def _step3(v):
         st.markdown(f'<div style="font-size:13px;color:{ui.INK_MUTED};margin-top:-4px;">② 무엇으로 떨어졌나 '
                     f'<span style="font-size:11.5px;">({rule})</span></div>', unsafe_allow_html=True)
         _bins(v, key="d16_bins", top=4)
+        if v["world"] == "nmos" and v.get("wat"):
+            _wat_line(v)
     with mid:
         _flow(v)
     with right:

@@ -1,10 +1,15 @@
 """
-NMOS 시연 시나리오 → data/demo/nmos_scenarios.json (대시보드 섹션 16 「NMOS 38단계」)
+NMOS 시연 시나리오 → data/demo/nmos_scenarios.json (대시보드 섹션 16 「NMOS 41단계」 — 38단계 + SAB 3단계)
 
 맵은 실제 WM-811K(A-1b lot 단위 분할의 test lot — 패턴 CNN이 한 번도 안 본 맵)이고, 측정 결과(11칸)는 NMOS 지식표
 (src/inference/rootcause_kb_nmos.py)의 원인에서 합성한다 — N-1 합성 시험과 같은 방식(주 측정 비율 = 지식표 기댓값,
 칩의 10%는 아무 칸 — 잡음). CNN은 맵을 실제로 판정하고, 엔진은 NMOS 지식표로 순위를 매긴다. 같은 측정을 기존 4칸으로
 묶었을 때의 공동 1순위 수도 같이 담는다(「측정을 늘려야 짚인다」를 화면에서 보이려고).
+
+*(2026-10-28 보강 — 「얼마나」)* 웨이퍼마다 WAT 값(Vt · SS · on 전류 · C-V 산화막)을 NMOS 소자 식(src/inference/nmos_device.py)
+으로 만든다 — 기준값 ± 정상 산포에, 시나리오가 정한 사고 크기(PLANT)를 얹는다. 엔진이 고른 원인마다 그 파라미터가 얼마나
+벗어났는지(중앙값 · 90% 범위)와 「파라미터를 하나씩 의심해 보기」 표를 같이 담는다. 원인마다 「크기를 말할 수 있는 유형인가」
+(KIND)도 카드에 붙인다.
 결정론적 — 같은 캐시·체크포인트면 같은 파일.
 
 ⚠️ 심을 때와 채점할 때 같은 표를 쓴다 — 「표가 맞다면 엔진이 이렇게 짚는다」까지다(N-1과 같은 한계).
@@ -23,6 +28,7 @@ sys.path.insert(0, ROOT)
 from scripts.a1_lot_consistency import load_cache                     # noqa: E402
 from scripts.a1b_lotwise_model import split_by_lot                     # noqa: E402
 from scripts.make_rootcause_scenarios import cnn_probs                 # noqa: E402
+from src.inference import nmos_device as nd                           # noqa: E402
 from src.inference import rootcause_kb as kb                           # noqa: E402
 from src.inference import rootcause_kb_nmos as nk                      # noqa: E402
 
@@ -35,10 +41,10 @@ PAT_KO = {"center": "가운데", "donut": "도넛", "edge-loc": "가장자리 �
 
 # 만드는 순서를 화면에서 묶어 보이는 단위 — 38줄을 다 늘어놓으면 스크롤해야 한다
 GROUPS = [("준비", "01", "02"), ("STI 소자 분리", "03", "14"), ("채널 · gate", "15", "23"),
-          ("source · drain", "24", "26"), ("salicide", "27", "27"), ("contact · 배선", "28", "36"),
+          ("source · drain · SAB", "24", "26c"), ("salicide", "27", "27"), ("contact · 배선", "28", "36"),
           ("마무리 · 검사", "37", "38")]
 
-# 측정 9가지(11칸) — 칩은 가장 크게 벗어난 측정 하나로 판정한다
+# 측정 9가지(12칸 — 면저항은 패턴 셋) — 칩은 가장 크게 벗어난 측정 하나로 판정한다
 BIN_PLAIN_TEST = {
     "open": "contact 체인 저항이 끝없이 큼 — 어딘가 안 이어짐",
     "gate_leak": "gate에 전압을 걸면 gate로 전류가 샘",
@@ -49,12 +55,13 @@ BIN_PLAIN_TEST = {
     "vt_low": "문턱 전압이 기준보다 낮음",
     "ss": "켜질 때 전류가 늘어나는 기울기가 완만함",
     "ion_low": "켜 둔 상태 전류가 기준보다 작음",
-    "rs_sd": "S/D 면저항이 기준보다 큼",
-    "rs_poly": "poly 면저항이 기준보다 큼",
+    "rs_sd": "silicide를 막은 시험 패턴(SAB)의 S/D 면저항이 기준보다 큼",
+    "rs_poly": "silicide를 막은 poly 저항의 면저항이 기준보다 큼",
+    "rs_sil": "silicide가 덮인 패턴의 면저항이 기준보다 큼",
 }
 # 색은 기존 4칸 묶음별 계열 — 끊김 보라 · 누설 붉은 계열 · 문턱 노랑~초록 · 전류 파랑 계열
 COLORS = ["#8F7EF2", "#E85D5D", "#F2946B", "#D9579A", "#B23A48",
-          "#E0A800", "#B5C930", "#6FBF5A", "#2E9FD0", "#3FC1C0", "#6C86E8"]
+          "#E0A800", "#B5C930", "#6FBF5A", "#2E9FD0", "#3FC1C0", "#6C86E8", "#9BB7F5"]
 
 # 엔진이 말하는 것(suspect) · 왜 이 모양(shape, None이면 모양별 기본 문장) · 먼저 확인할 것(checks)
 TEXT = {
@@ -151,6 +158,37 @@ TEXT = {
     "c_cleanroom": ("클린룸 입자가 늘었을 가능성", "입자는 아무 데나 떨어져 흩어져요 (Hansen · Stapper)",
                     ["클린룸 입자 수 기록"]),
 }
+# 크기를 어디까지 말하나 — 유형 넷 (wiki §29). 전기 값 중 식을 붙인 것은 nd.CAUSE_KNOB에 있다
+KIND = {**{c: "전기 값" for c in ("n02_clean_metal", "n15_screen_skip", "n16_vt_dose", "n17_screen_residue", "n19_gox_thick",
+                                   "n20_poly_doping", "n21a_gate_focus", "n24_sd_dose", "n26_rta_edge",
+                                   "n27_salicide_temp", "n37_forming_gas_skip")},
+        **{c: "여유" for c in ("n05_active_focus", "n06_nit_etch_under", "n07_trench_edge", "n09_liner_skip",
+                                "n11_densify_skip", "n12_sti_cmp_edge", "n13_nit_residue", "n14_padox_overetch",
+                                "n22_poly_overetch", "n25_spacer_thin", "n29_ild_cmp_edge", "n30_contact_barc",
+                                "n33_tin_thin", "n34_w_cmp_edge", "n35_metal_underetch", "n36_pad_open")},
+        **{c: "결함 밀도" for c in ("n08_pr_residue", "n10_fill_void", "n28_ild_particle", "c_cmp_scratch",
+                                    "c_robot_scratch", "c_cleanroom")},
+        **{c: "장비 변수" for c in ("n01_bevel", "n18_rinse_charge", "n21b_develop_residue", "n23_gate_ash_charge",
+                                    "n31_contact_edge_ring", "n32_contact_ash_charge", "n38_probe")}}
+KIND_TODO = {   # 전기 값인데 크기 식을 아직 안 붙인 것 — 왜
+    "n02_clean_metal": "접합 누설 식(트랩 → 누설 전류)을 아직 안 붙였어요",
+    "n15_screen_skip": "평균이 아니라 칩마다 흩어지는 사고라, 흩어짐(σ) 식이 따로 필요해요",
+    "n21a_gate_focus": "gate 길이 → on 전류 식을 아직 안 붙였어요 (0.5 µm면 Vt는 거의 안 움직여요)",
+}
+
+
+def kind_note(c, checks):
+    k = KIND[c.id]
+    if k == "전기 값":
+        return ("WAT 값으로 크기를 거꾸로 계산해요" if c.id in nd.CAUSE_KNOB else
+                f"크기 — {KIND_TODO[c.id]}")
+    if k == "여유":
+        return f"크기 — 끊김 · 누설은 예 / 아니오라 칩 측정에 크기가 안 남아요. 여유를 넘었는지는 「{checks[0]}」로"
+    if k == "결함 밀도":
+        return "크기 — 칩당 결함 수로 말할 수 있어요(불량 칩 비율 → 수율 식). 다음 단계에서 붙여요"
+    return f"크기 — 칩 측정에 장비 값이 안 남아요. 「{checks[0]}」로 확인"
+
+
 SHAPE_DEFAULT = {"near-full": "이 단계는 웨이퍼 전체를 한꺼번에 처리해서, 틀어지면 거의 전체 칩이 걸려요",
                  "edge-ring": "가장자리만 조건이 달라져 링으로 나와요",
                  "center": "가운데만 조건이 달라져 가운데 칩이 걸려요",
@@ -160,6 +198,7 @@ SPLIT = {
     frozenset({"n29_ild_cmp_edge", "n31_contact_edge_ring"}): "가장자리 ILD 두께 vs edge ring 사용 시간(RF 시간)",
     frozenset({"n18_rinse_charge", "n23_gate_ash_charge", "n32_contact_ash_charge"}):
         "헹굼물 저항 · CO₂ 주입 기록 vs ashing 장비 균일도 · 안테나 크기별 누설",
+    frozenset({"n17_screen_residue", "n19_gox_thick"}): "screen oxide 제거 시간 기록 vs 산화로 온도 · 시간 기록",
 }
 
 # (id, 넣을 원인, 제목, 설명)
@@ -169,9 +208,11 @@ SCENARIOS = [
     ("N2", "n37_forming_gas_skip", "거의 전체 + SS 큼 · Vt 높음",
      "N1과 같은 거의 전체인데 SS 기울기도 같이 커졌어요. 측정 하나 차이로 전혀 다른 단계를 짚어요."),
     ("N3", "n20_poly_doping", "거의 전체 + poly 면저항 · Vt 높음",
-     "이번엔 poly 면저항이 같이 커졌어요. 기존 4칸이면 면저항과 전류 부족이 한 칸이라 못 가르던 경우예요."),
-    ("N4", "n26_rta_edge", "가장자리 링 + S/D 면저항 · on 전류",
-     "가장자리 칩들의 S/D 면저항이 크고 전류가 부족해요. 가장자리 링을 만드는 단계 9개 중 하나로 좁혀요."),
+     "Vt가 높고 on 전류가 크게 줄었는데, silicide를 막은 poly 저항도 커졌어요. SAB 패턴이 있어야 poly 도핑 부족이 "
+     "면저항으로 보여요 — silicide가 덮인 poly로는 안 보여요."),
+    ("N4", "n26_rta_edge", "가장자리 링 + S/D 면저항 — 몇 °C",
+     "가장자리 칩들의 S/D 면저항이 커요(silicide를 막은 시험 패턴). 가장자리 링 후보 9개 중 RTA 하나로 좁히고, "
+     "면저항 차이로 가장자리가 몇 °C 덜 데워졌는지까지 계산해요."),
     ("N5", "n30_contact_barc", "가장자리 일부 + 연결 끊김",
      "한쪽 가장자리 칩만 끊겼어요. 가장자리 일부 후보는 둘인데 바뀌는 측정이 달라 갈려요."),
     ("N6", "n21b_develop_residue", "도넛 + 배선 누설 · 끊김",
@@ -181,19 +222,37 @@ SCENARIOS = [
      "갈리는지 말해요."),
     ("N8", "n18_rinse_charge", "가운데 + gate 누설 — 셋이 묶임",
      "가운데 칩의 gate가 샜어요. 세정 헹굼 · gate 뒤 ashing · contact 뒤 ashing 셋이 같은 모양 · 같은 측정이에요."),
+    ("N10", "n24_sd_dose", "거의 전체 + S/D 면저항 — 도즈",
+     "웨이퍼 전체의 S/D 면저항이 커졌어요. 같은 면저항이라도 N4처럼 가장자리 링이면 RTA, 거의 전체면 S/D 주입 도즈예요 — "
+     "측정이 같으면 맵 모양이 가려요."),
+    ("N11", "n27_salicide_temp", "거의 전체 + silicide 면저항 — 고저항 상",
+     "silicide가 덮인 패턴의 면저항이 두 배 가까이 됐어요. salicide 열처리 온도가 낮아 고저항 상(C49)이 얼마나 남았는지 "
+     "계산해요."),
+    ("N9", "n19_gox_thick", "거의 전체 + Vt 높음 · on 전류 부족 — 얼마나",
+     "Vt가 높고 on 전류도 줄었어요. 단계는 gate 산화와 screen oxide 잔막이 공동이지만, C-V로 잰 산화막 두께로 "
+     "「얼마나」는 둘 다 같이 말할 수 있어요."),
 ]
+# 「얼마나」를 보일 시나리오의 사고 크기 — 정상 산포로 뽑은 웨이퍼에 얹는다 (나머지 시나리오의 WAT 값은 정상 웨이퍼)
+PLANT = {"N1": ("Na", lambda p: p["Na"] * 1.45),        # 채널 도핑 +45% → Vt 약 +0.14 V
+         "N2": ("Dit", lambda p: p["Dit"] * 100),       # forming gas 생략 — 계면 트랩 약 100배 (Mack 2023)
+         "N3": ("Ndp", lambda p: 5e18),                 # poly 도핑 10²⁰ → 5×10¹⁸
+         "N9": ("tox", lambda p: 75e-8),                # gate 산화막 60 → 75 Å
+         "N4": ("dT", lambda p: p["dT"] - 20.0),        # RTA 가장자리 −20 °C (가장자리 site에서 잰다)
+         "N10": ("sd", lambda p: p["sd"] * 0.65),       # S/D 활성 도즈 −35%
+         "N11": ("c49", lambda p: 0.35)}                # 고저항 상 C49가 35% 남음
 
 
 def card(c):
     suspect, shape, checks = TEXT[c.id]
     labels = " · ".join(nk.BIN_LABELS[b] for b in c.primary)
-    step_txt = " · ".join(f"{int(s)}. {nk.STEPS[s]}" for s in c.steps) or "전 공정 공통"
+    step_txt = " · ".join(f"{s.lstrip('0')}. {nk.STEPS[s]}" for s in c.steps) or "전 공정 공통"
     return {"title": c.name, "suspect": suspect, "this": f"{c.name} — {c.knob}",
             "normal": f"{labels} 칩이 거의 없음", "checks": checks,
             "what": f"{step_txt} — {c.knob}",
             "shape": f"{PAT_KO[c.pattern]} — {shape or SHAPE_DEFAULT[c.pattern]}",
             "test": f"{labels} 쪽으로 쏠려요 — " + " · ".join(BIN_PLAIN_TEST[b] for b in c.primary),
-            "source": f"근거 수준 「{c.evidence}」 · {c.source}", "evidence": c.evidence}
+            "source": f"근거 수준 「{c.evidence}」 · {c.source}", "evidence": c.evidence,
+            "kind": KIND[c.id], "kind_note": kind_note(c, checks)}
 
 
 def rank(P, counts, signatures=None):
@@ -242,13 +301,39 @@ def main():
                     "post_pct": round(float(post[i]) * 100, 1), "tied": len(top) > 1 and i in top} for i in keep]
         top_ids = frozenset(nk.CAUSE_IDS[i] for i in top)
         if len(top) == 1:
-            note = ("good", f"측정 11칸으로 단독 1순위예요. 같은 측정을 기존 4칸(끊김 · 누설 · 문턱 이탈 · 전류 부족)으로 "
+            note = ("good", f"측정 {nk.B}칸으로 단독 1순위예요. 같은 측정을 기존 4칸(끊김 · 누설 · 문턱 이탈 · 전류 부족)으로 "
                             + (f"묶었다면 공동 1순위가 {len(top4)}개였어요." if len(top4) > 1 else "묶어도 단독이에요."))
         else:
             split = SPLIT.get(top_ids)
-            note = ("info", f"측정 11칸으로도 안 갈리는 {len(top)}개 묶음이에요"
+            note = ("info", f"측정 {nk.B}칸으로도 안 갈리는 {len(top)}개 묶음이에요"
                             + (f" — {split}을 재면 갈려요." if split else ".")
                             + f" 기존 4칸이었다면 공동 {len(top4)}개였어요.")
+        # WAT 값 — 정상 웨이퍼 하나를 뽑고, 사고 크기를 얹는다
+        rng_w = np.random.default_rng(SEED + 100 + n_s)
+        params = {k: float(v[0]) for k, v in nd.sample_normal(rng_w, 1).items()}
+        planted = None
+        if sid in PLANT:
+            prm, f = PLANT[sid]
+            params[prm] = float(f(params))
+            planted = {"param": prm, "label": nd.KNOB[prm][0], "value": nd.fmt(prm, params[prm]),
+                       "normal": nd.fmt_range(prm, *nd.normal_range(prm)), "raw": params[prm]}
+        meas = nd.measure(params, rng_w)
+        if planted:
+            # 넣은 값이 90% 범위 밖이면 왜 그런지 — 정상 산포에서 가장 멀리 뽑힌 다른 파라미터
+            raw = nd.estimate(cid, meas)["raw"]
+            # 화면 자릿수로 같으면 안으로 본다 — 「5.0 vs 5.0 ~ 5.2」를 밖이라고 하면 보는 사람이 헷갈린다
+            planted["inside"] = bool(raw["p5"] <= planted["raw"] <= raw["p95"] or nd.fmt(prm, planted["raw"]) in
+                                     (nd.fmt(prm, raw["p5"]), nd.fmt(prm, raw["p95"])))
+            z = {k: (np.log(params[k] / nd.NOM[k]) if k == "Dit" else
+                     (params[k] - nd.NOM[k]) if k in ("dT", "c49") else (params[k] / nd.NOM[k] - 1)) / nd.SPREAD[k]
+                 for k in nd.NOM if k != planted["param"]}
+            kz = max(z, key=lambda k: abs(z[k]))
+            planted["nuisance"], planted["nuisance_z"] = nd.KNOB[kz][0], float(abs(z[kz]))
+        mag = {}
+        for r in ranking:
+            e = nd.estimate(r["cause_id"], meas)
+            if e is not None:
+                mag[r["cause_id"]] = {k: v for k, v in e.items() if k != "raw"}
         top3_pat = np.argsort(-P)[:3]
         item = {
             "id": sid, "title": title, "story": story, "set_cause": cid, "truth": [cid],
@@ -260,17 +345,31 @@ def main():
             "bins_used": bool(nk.informative(counts[None])[0]),
             "die_map": die.tolist(), "ranking": ranking, "tie_size": len(top), "tie_size_4bin": len(top4),
             "note": note,
+            "wat": {"meas": meas, "in_spec": {k: bool(v) for k, v in nd.in_spec(meas).items()},
+                    "where": ("가장자리 site 4곳 중앙값" if c.pattern in ("edge-ring", "edge-loc") else "웨이퍼 9곳 중앙값")},
+            "planted": planted, "magnitude": mag,
+            # 맵 모양(CNN 1위)이 남긴 후보의 파라미터만 — 막은 S/D 면저항 하나로는 도즈와 RTA 온도가 같아 보인다
+            "fingerprint": [{k: v for k, v in r.items() if k != "raw"} for r in
+                            nd.fingerprint(meas, causes=nk.PATTERN_CANDIDATES[kb.PATTERNS[1 + int(P[1:].argmax())]])],
         }
         out.append(item)
         hit = cid in top_ids
         print(f"{sid} {title:<34} CNN {item['cnn']['top']:<9} {item['cnn']['conf_pct']:5.1f}%  "
-              f"1위 {'·'.join(sorted(top_ids)):<60} {'✓' if hit else '✗'}  11칸 공동 {len(top)} · 4칸 공동 {len(top4)}")
+              f"1위 {'·'.join(sorted(top_ids)):<60} {'✓' if hit else '✗'}  {nk.B}칸 공동 {len(top)} · 4칸 공동 {len(top4)}")
+        if planted:
+            e = mag.get(cid)
+            print(f"     넣은 크기 {planted['label']} {planted['value']} → 엔진 {e['value']} ({e['lo']} ~ {e['hi']}) "
+                  f"· 정상 {e['normal']} · 다른 측정과 {'맞음' if e['consistent'] else '안 맞음 ' + str(e['mismatch'])} · "
+                  f"설명하는 줄 {[r['label'] for r in item['fingerprint'] if r['explains']]}")
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     with open(OUT, "w", encoding="utf-8") as f:
         # 대시보드는 src.inference를 import하지 않는다 — 화면 문구를 같이 담는다
         json.dump({"flow": [[k, n] for k, n in nk.STEPS.items()], "groups": GROUPS, "bin_types": nk.BIN_TYPES,
                    "bin_plain": nk.BIN_LABELS, "bin_plain_test": BIN_PLAIN_TEST, "colors": COLORS,
                    "card": {c.id: card(c) for c in nk.CAUSES}, "unobservable": nk.UNOBSERVABLE,
+                   "wat_spec": {"base": nd.BASE, "spec": nd.SPEC, "label": nd.MEAS_LABEL,
+                                "tox_range": [x * 1e8 for x in nd.normal_range("tox")],
+                                "normal_range": {prm: nd.fmt_range(prm, *nd.normal_range(prm)) for prm in nd.KNOB}},
                    "scenarios": out}, f, ensure_ascii=False)
     print("저장:", OUT)
 

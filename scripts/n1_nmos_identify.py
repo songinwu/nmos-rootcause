@@ -1,11 +1,12 @@
 """
-N-1. NMOS 지식표 — 「38단계 중 하나가 잘못되면 바로 짚나」 합성 시험.
+N-1. NMOS 지식표 — 「41단계(38 + SAB 3) 중 하나가 잘못되면 바로 짚나」 합성 시험.
 
 원인 40개마다 그 원인의 모양을 가진 실제 WM-811K 맵을 뽑아(원인당 N장), 불량 칩마다 그 원인의 예상 비율대로
 측정 결과를 붙이고(칩의 10%는 아무 결과 — 잡음), 엔진이 그 원인을 되찾는지 본다.
 
     입력 두 가지 : ① 참 모양(지식표만의 구별력) ② 모양 AI(CNN) 확률(실제 화면과 같은 조건)
-    검사 두 가지 : 측정 11칸(rootcause_kb_nmos) vs 기존 4칸으로 묶은 것
+    검사 두 가지 : 측정 12칸(rootcause_kb_nmos — 2026-10-28 SAB로 11 → 12) vs 기존 4칸으로 묶은 것
+                   (JSON 키 이름의 _11은 처음 11칸일 때 붙인 이름 그대로 둔다)
     채점         : 단독 1위(정답이 1위이고 동점 없음) · 공동 1위 안 · 3순위 안
                    — 「바로 짚음」은 단독 1위다. 표만 보고 한 예측(predicted_unique)과 맞대 본다.
 
@@ -84,8 +85,8 @@ def main():
              "cnn_4": judge(Pc, nk.collapse4(counts), ci, nk.SIGNATURES4),
              "cnn_pattern_acc": float((Pc.argmax(1) == pi).mean())}
         res["causes"][c.id] = r
-        print(f"{c.id:24s} {c.pattern:9s} 예측 {'단독' if pred11[c.id] else '묶음'} | 참모양 11칸 단독 {r['true_pattern_11']['solo']*100:5.1f}% "
-              f"· 4칸 {r['true_pattern_4']['solo']*100:5.1f}% | CNN 11칸 단독 {r['cnn_11']['solo']*100:5.1f}% 3순위 {r['cnn_11']['top3']*100:5.1f}%")
+        print(f"{c.id:24s} {c.pattern:9s} 예측 {'단독' if pred11[c.id] else '묶음'} | 참모양 {nk.B}칸 단독 {r['true_pattern_11']['solo']*100:5.1f}% "
+              f"· 4칸 {r['true_pattern_4']['solo']*100:5.1f}% | CNN {nk.B}칸 단독 {r['cnn_11']['solo']*100:5.1f}% 3순위 {r['cnn_11']['top3']*100:5.1f}%")
     cs = res["causes"].values()
     summ = {}
     for key in ("true_pattern_11", "true_pattern_4", "cnn_11", "cnn_4"):
