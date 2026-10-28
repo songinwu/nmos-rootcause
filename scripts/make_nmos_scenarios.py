@@ -199,6 +199,7 @@ SPLIT = {
     frozenset({"n18_rinse_charge", "n23_gate_ash_charge", "n32_contact_ash_charge"}):
         "헹굼물 저항 · CO₂ 주입 기록 vs ashing 장비 균일도 · 안테나 크기별 누설",
     frozenset({"n17_screen_residue", "n19_gox_thick"}): "screen oxide 제거 시간 기록 vs 산화로 온도 · 시간 기록",
+    frozenset({"n36_pad_open", "n38_probe"}): "다시 재 보기(바늘이면 살아남) vs pad 현미경 확인",
 }
 
 # (id, 넣을 원인, 제목, 설명)
@@ -231,7 +232,26 @@ SCENARIOS = [
     ("N9", "n19_gox_thick", "거의 전체 + Vt 높음 · on 전류 부족 — 얼마나",
      "Vt가 높고 on 전류도 줄었어요. 단계는 gate 산화와 screen oxide 잔막이 공동이지만, C-V로 잰 산화막 두께로 "
      "「얼마나」는 둘 다 같이 말할 수 있어요."),
+    # 2026-10-28 추가 — 근거 지도(wiki 원인공정추천-NMOS-근거지도)의 후보 ③ · ④ · ⑥ · ①
+    ("N12", "n10_fill_void", "한 곳 뭉침 + 분리 누설 — 칩당 결함 수",
+     "한 자리에 뭉친 칩들이 이웃 소자 사이로 샜어요(분리 누설). 장비에서 떨어진 입자가 한 곳에 뭉치는 건 원문(Hansen · "
+     "Stapper)이고, 그 장비가 STI를 채우는 단계라는 건 우리 배정이에요. 맵의 불량 칩 비율로 그 자리의 칩당 결함 수를 계산해요."),
+    ("N13", "n37_forming_gas_skip", "거의 전체 + Vt · SS — 사고 둘이 겹침",
+     "Vt 주입 도즈가 많고 forming gas도 빼먹은 웨이퍼예요. 파라미터 하나로는 WAT 값이 설명되지 않아서, 엔진이 "
+     "「사고가 겹쳤을 가능성」을 경고하는지 봐요."),
+    ("N14", "n07_trench_edge", "가장자리 링 + 분리 누설 — trench 식각",
+     "가장자리 칩들이 이웃 소자 사이로 샜어요. 가장자리 링 후보 9개 중 분리 누설은 trench 식각 하나예요. edge ring 원문"
+     "(Chai · Brady)을 trench 식각으로 옮긴 경우라 근거는 「옮김」이에요."),
+    ("N15", "n22_poly_overetch", "가장자리 링 + gate 누설 — poly 식각",
+     "같은 가장자리 링인데 이번엔 gate가 샜어요. 가장자리에서 poly를 너무 깎아 gate 산화막이 다친 경우예요(옮김)."),
+    ("N16", "n34_w_cmp_edge", "가장자리 링 + 배선 누설 — W CMP",
+     "가장자리 칩들의 배선이 붙었어요. 가장자리에서 W가 덜 깎여 남은 경우예요(Goh의 CMP 가장자리 두께를 옮김)."),
+    ("N17", "n38_probe", "거의 전체 + 연결 끊김 — 공정이 아니라 검사?",
+     "거의 전체 칩이 연결 끊김으로 떨어졌어요. 검사 바늘이 덜 닿았다면 공정은 멀쩡해요 — pad가 덜 열린 경우와 똑같이 "
+     "보여서, 다시 재 보면 갈려요(IBM · TI 특허)."),
 ]
+# 사고를 둘 넣는 시나리오 — 칩 측정은 두 원인의 예상 비율을 반씩 섞고, 정답은 둘 다
+MIX = {"N13": ["n16_vt_dose", "n37_forming_gas_skip"]}
 # 「얼마나」를 보일 시나리오의 사고 크기 — 정상 산포로 뽑은 웨이퍼에 얹는다 (나머지 시나리오의 WAT 값은 정상 웨이퍼)
 PLANT = {"N1": ("Na", lambda p: p["Na"] * 1.45),        # 채널 도핑 +45% → Vt 약 +0.14 V
          "N2": ("Dit", lambda p: p["Dit"] * 100),       # forming gas 생략 — 계면 트랩 약 100배 (Mack 2023)
@@ -239,7 +259,9 @@ PLANT = {"N1": ("Na", lambda p: p["Na"] * 1.45),        # 채널 도핑 +45% →
          "N9": ("tox", lambda p: 75e-8),                # gate 산화막 60 → 75 Å
          "N4": ("dT", lambda p: p["dT"] - 20.0),        # RTA 가장자리 −20 °C (가장자리 site에서 잰다)
          "N10": ("sd", lambda p: p["sd"] * 0.65),       # S/D 활성 도즈 −35%
-         "N11": ("c49", lambda p: 0.35)}                # 고저항 상 C49가 35% 남음
+         "N11": ("c49", lambda p: 0.35),                # 고저항 상 C49가 35% 남음
+         "N13": [("Na", lambda p: p["Na"] * 1.45),      # 둘 다 — Vt 주입 도즈 +45%
+                 ("Dit", lambda p: p["Dit"] * 100)]}    #        + forming gas 생략
 
 
 def card(c):
@@ -253,6 +275,48 @@ def card(c):
             "test": f"{labels} 쪽으로 쏠려요 — " + " · ".join(BIN_PLAIN_TEST[b] for b in c.primary),
             "source": f"근거 수준 「{c.evidence}」 · {c.source}", "evidence": c.evidence,
             "kind": KIND[c.id], "kind_note": kind_note(c, checks)}
+
+
+def density(wm, rng):
+    """결함 밀도 유형의 「얼마나」 — 실제 맵의 불량 칩 비율을 Stapper 1983 p.458 식 (15)(Poisson 수율 Y = e^−λ)로 거꾸로
+    풀어 칩당 결함 수 λ를 낸다. 가장 큰 불량 덩어리(4방향 연결)를 한 칸 넓힌 자리와 나머지를 따로 보고, 90% 범위는
+    합격 칩 수의 베타 분포에서. 군집을 넣은 식(p.460 식 (25))은 군집 계수를 몰라 쓰지 않는다."""
+    fail, on = wm == 2, wm > 0
+    lab = np.zeros(wm.shape, int)
+    best, best_n, cur = 0, 0, 0
+    for i, j in zip(*np.where(fail)):
+        if lab[i, j]:
+            continue
+        cur += 1
+        stack, n = [(i, j)], 0
+        lab[i, j] = cur
+        while stack:
+            a, b = stack.pop()
+            n += 1
+            for da, db in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                x, z = a + da, b + db
+                if 0 <= x < wm.shape[0] and 0 <= z < wm.shape[1] and fail[x, z] and not lab[x, z]:
+                    lab[x, z] = cur
+                    stack.append((x, z))
+        if n > best_n:
+            best, best_n = cur, n
+    core = lab == best
+    region = core.copy()
+    region[1:, :] |= core[:-1, :]
+    region[:-1, :] |= core[1:, :]
+    region[:, 1:] |= core[:, :-1]
+    region[:, :-1] |= core[:, 1:]
+    region &= on
+
+    def lam(mask):
+        n, k = int(mask.sum()), int((mask & (wm == 1)).sum())
+        return np.percentile(-np.log(rng.beta(k + 1, n - k + 1, 4000)), [5, 50, 95]), n
+
+    (l5, l50, l95), n_in = lam(region)
+    (_, r50, _), _ = lam(on & ~region)
+    return {"param": "lam", "kind": "density", "label": "그 자리 칩당 결함 수", "from": "불량 칩 비율 · Stapper 수율 식",
+            "value": f"{l50:.1f}개", "lo": f"{l5:.1f}개", "hi": f"{l95:.1f}개", "normal": f"나머지 {r50:.2f}개",
+            "region": n_in, "out_of_range": bool(l50 > 3 * r50), "consistent": True, "mismatch": []}
 
 
 def rank(P, counts, signatures=None):
@@ -287,7 +351,8 @@ def main():
         used.add(int(lots[gi]))
         wm = maps_u8[gi]
         fail = wm == 2
-        b = rng.choice(nk.B, size=int(fail.sum()), p=nk.SIGNATURES[nk.CAUSE_INDEX[cid]])
+        sig = np.mean([nk.SIGNATURES[nk.CAUSE_INDEX[x]] for x in MIX.get(sid, [cid])], axis=0)
+        b = rng.choice(nk.B, size=int(fail.sum()), p=sig / sig.sum())
         flip = rng.random(b.size) < EPS_BIN
         b[flip] = rng.integers(0, nk.B, int(flip.sum()))
         die = wm.astype(int)
@@ -313,12 +378,17 @@ def main():
         params = {k: float(v[0]) for k, v in nd.sample_normal(rng_w, 1).items()}
         planted = None
         if sid in PLANT:
-            prm, f = PLANT[sid]
-            params[prm] = float(f(params))
-            planted = {"param": prm, "label": nd.KNOB[prm][0], "value": nd.fmt(prm, params[prm]),
-                       "normal": nd.fmt_range(prm, *nd.normal_range(prm)), "raw": params[prm]}
+            pl = PLANT[sid] if isinstance(PLANT[sid], list) else [PLANT[sid]]
+            for prm, f in pl:
+                params[prm] = float(f(params))
+            if len(pl) == 1:
+                planted = {"param": prm, "label": nd.KNOB[prm][0], "value": nd.fmt(prm, params[prm]),
+                           "normal": nd.fmt_range(prm, *nd.normal_range(prm)), "raw": params[prm]}
+            else:
+                planted = {"param": "+".join(q for q, _ in pl), "label": " + ".join(nd.KNOB[q][0] for q, _ in pl),
+                           "value": " · ".join(nd.fmt(q, params[q]) for q, _ in pl), "normal": "—", "multi": True}
         meas = nd.measure(params, rng_w)
-        if planted:
+        if planted and not planted.get("multi"):
             # 넣은 값이 90% 범위 밖이면 왜 그런지 — 정상 산포에서 가장 멀리 뽑힌 다른 파라미터
             raw = nd.estimate(cid, meas)["raw"]
             # 화면 자릿수로 같으면 안으로 본다 — 「5.0 vs 5.0 ~ 5.2」를 밖이라고 하면 보는 사람이 헷갈린다
@@ -330,13 +400,27 @@ def main():
             kz = max(z, key=lambda k: abs(z[k]))
             planted["nuisance"], planted["nuisance_z"] = nd.KNOB[kz][0], float(abs(z[kz]))
         mag = {}
+        dens = None
         for r in ranking:
             e = nd.estimate(r["cause_id"], meas)
             if e is not None:
                 mag[r["cause_id"]] = {k: v for k, v in e.items() if k != "raw"}
+            elif KIND[r["cause_id"]] == "결함 밀도":      # 크기는 원인이 아니라 맵에서 — 결함 밀도 원인끼리 같은 값
+                dens = dens or density(wm, np.random.default_rng(SEED + 200 + n_s))
+                mag[r["cause_id"]] = dens
+        # 맵 모양(CNN 1위)이 남긴 후보의 파라미터만 — 막은 S/D 면저항 하나로는 도즈와 RTA 온도가 같아 보인다
+        fp = [{k: v for k, v in r.items() if k != "raw"} for r in
+              nd.fingerprint(meas, causes=nk.PATTERN_CANDIDATES[kb.PATTERNS[1 + int(P[1:].argmax())]])]
+        # WAT가 합격선 밖인데 어느 파라미터 하나로도 설명이 안 되면 — 사고가 겹쳤을 가능성 (「얼마나」를 믿지 않는다)
+        wat_bad = [nd.MEAS_LABEL[k] for k, v in nd.in_spec(meas).items() if not v]
+        warning = None
+        if wat_bad and fp and not any(r["explains"] for r in fp):
+            warning = (f"WAT 값({' · '.join(wat_bad)})이 합격선 밖인데, 파라미터 하나로는 설명이 안 돼요 — 사고가 둘 이상 "
+                       "겹쳤을 가능성이 있어요. 1순위의 「얼마나」는 믿지 말고, 후보 단계들의 기록을 같이 확인하세요.")
+        truth = MIX.get(sid, [cid])
         top3_pat = np.argsort(-P)[:3]
         item = {
-            "id": sid, "title": title, "story": story, "set_cause": cid, "truth": [cid],
+            "id": sid, "title": title, "story": story, "set_cause": cid, "truth": truth, "warning": warning,
             "source": {"dataset": "WM-811K", "split": "A-1b lot-wise test", "lot": str(lot_names[int(lots[gi])]),
                        "cache_index": gi, "true_pattern": c.pattern},
             "cnn": {"top": kb.PATTERNS[int(P.argmax())], "conf_pct": round(float(P.max()) * 100, 1),
@@ -347,16 +431,17 @@ def main():
             "note": note,
             "wat": {"meas": meas, "in_spec": {k: bool(v) for k, v in nd.in_spec(meas).items()},
                     "where": ("가장자리 site 4곳 중앙값" if c.pattern in ("edge-ring", "edge-loc") else "웨이퍼 9곳 중앙값")},
-            "planted": planted, "magnitude": mag,
-            # 맵 모양(CNN 1위)이 남긴 후보의 파라미터만 — 막은 S/D 면저항 하나로는 도즈와 RTA 온도가 같아 보인다
-            "fingerprint": [{k: v for k, v in r.items() if k != "raw"} for r in
-                            nd.fingerprint(meas, causes=nk.PATTERN_CANDIDATES[kb.PATTERNS[1 + int(P[1:].argmax())]])],
+            "planted": planted, "magnitude": mag, "fingerprint": fp,
         }
         out.append(item)
-        hit = cid in top_ids
+        hit = any(t in top_ids for t in truth)
         print(f"{sid} {title:<34} CNN {item['cnn']['top']:<9} {item['cnn']['conf_pct']:5.1f}%  "
               f"1위 {'·'.join(sorted(top_ids)):<60} {'✓' if hit else '✗'}  {nk.B}칸 공동 {len(top)} · 4칸 공동 {len(top4)}")
-        if planted:
+        if warning:
+            print("     ⚠️", warning)
+        if dens:
+            print(f"     칩당 결함 수 — 그 자리 {dens['value']} ({dens['lo']} ~ {dens['hi']}, {dens['region']}칸) · {dens['normal']}")
+        if planted and not planted.get("multi"):
             e = mag.get(cid)
             print(f"     넣은 크기 {planted['label']} {planted['value']} → 엔진 {e['value']} ({e['lo']} ~ {e['hi']}) "
                   f"· 정상 {e['normal']} · 다른 측정과 {'맞음' if e['consistent'] else '안 맞음 ' + str(e['mismatch'])} · "

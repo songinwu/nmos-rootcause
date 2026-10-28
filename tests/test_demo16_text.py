@@ -44,7 +44,17 @@ def test_nmos_magnitude_scenarios():
     planted = [s for s in d["scenarios"] if s.get("planted")]
     assert len(planted) >= 4
     for s in planted:
+        if s["planted"].get("multi"):     # 사고 둘 — 어느 줄도 설명 못 하고 경고가 떠야 한다
+            assert s["warning"] and not any(r["explains"] for r in s["fingerprint"])
+            assert set(s["truth"]) >= {r["cause_id"] for r in s["ranking"] if r["tied"]} or s["ranking"][0]["cause_id"] in s["truth"]
+            continue
         assert [r["param"] for r in s["fingerprint"] if r["explains"]] == [s["planted"]["param"]]
         e = s["magnitude"][s["set_cause"]]
         assert e["out_of_range"] and e["consistent"]
+        assert not s["warning"]
+    # 결함 밀도 유형은 맵에서 칩당 결함 수 — 뭉친 자리가 나머지보다 훨씬 많아야 한다
+    dens = [m for s in d["scenarios"] for m in s["magnitude"].values() if m.get("kind") == "density"]
+    assert dens and all(m["out_of_range"] for m in dens)
+    # 사고를 안 넣은 웨이퍼에 경고가 뜨면 안 된다
+    assert not any(s["warning"] for s in d["scenarios"] if not s.get("planted"))
     assert all(c.get("kind") in ("전기 값", "여유", "결함 밀도", "장비 변수") for c in d["card"].values())

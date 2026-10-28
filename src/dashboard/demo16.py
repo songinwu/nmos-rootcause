@@ -165,8 +165,10 @@ def _view_nmos(sid):
         die_map=sc["die_map"], bins=d["bin_types"], bin_plain=d["bin_plain"], bin_test=d["bin_plain_test"],
         colors=d["colors"], counts=sc["bin_counts"],
         cnn=(sc["cnn"]["top"], sc["cnn"]["conf_pct"], [(t["pattern"], t["pct"]) for t in sc["cnn"]["top3"][1:]]),
-        ranking=ranking, note=sc.get("note"), injected=card[sc["set_cause"]]["this"], lot=sc["source"]["lot"],
-        hit=any(rk == 1 and r["cause_id"] == sc["set_cause"] for rk, r in zip(ranks, sc["ranking"])),
+        ranking=ranking, note=sc.get("note"), lot=sc["source"]["lot"],
+        injected=" + ".join(card[t]["this"] for t in sc.get("truth", [sc["set_cause"]])),   # 사고를 둘 넣은 웨이퍼도 있다
+        hit=any(rk == 1 and r["cause_id"] in sc.get("truth", [sc["set_cause"]]) for rk, r in zip(ranks, sc["ranking"])),
+        warning=sc.get("warning"),
         n_cause=len(card), bin_rule="가장 크게 벗어난 측정",
         wat=sc.get("wat"), wat_spec=d.get("wat_spec"), planted=sc.get("planted"),
         magnitude=sc.get("magnitude", {}), fingerprint=sc.get("fingerprint", []), set_cause=sc["set_cause"],
@@ -247,6 +249,10 @@ def _wat_line(v):
 def _mag_line(r):
     """③ 엔진 칸의 「얼마나」 한 줄 — 크기를 재는 원인이면 크기 · 90% 범위 · 정상 범위 · 다른 측정과 맞나, 아니면 왜 못 재나."""
     mg = r.get("mag")
+    if mg and mg.get("kind") == "density":   # 결함 밀도 — 맵의 불량 칩 비율에서 칩당 결함 수
+        return (f'<div style="color:{ui.INK_MUTED};font-size:12.5px;margin-top:3px;">얼마나 — '
+                f'<b style="color:{ui.ACCENT};font-size:14px;">{mg["label"]} 약 {mg["value"]}</b> '
+                f'<span>(90% {mg["lo"]} ~ {mg["hi"]})</span><br>웨이퍼 {mg["normal"]} · {mg["from"]}으로 계산</div>')
     if not mg:
         return (f'<div style="color:{ui.INK_MUTED};font-size:12px;margin-top:3px;">{r.get("kind_note", "")} '
                 f'<span style="font-size:11px;">(유형: {r.get("kind", "—")})</span></div>')
@@ -460,6 +466,12 @@ def _answer_dialog(world, sid):
     else:
         st.warning("넣은 사고가 엔진의 1순위에 없어요.", icon="⚠️")
     pl = v.get("planted")
+    if pl and pl.get("multi"):
+        st.markdown(f"**넣은 크기** — {pl['label']} {pl['value']} (사고 둘을 같이 넣음)")
+        if v.get("warning"):
+            st.success("엔진이 「파라미터 하나로는 설명이 안 된다」고 경고했어요 — 사고가 겹쳤을 때 맞는 반응이에요. "
+                       "1순위의 「얼마나」만 믿었다면 크기를 잘못 말했을 거예요.", icon="✅")
+        pl = None
     if pl:
         e = v["magnitude"].get(v["set_cause"])
         st.markdown(f"**넣은 크기** — {pl['label']} {pl['value']} (정상 {pl['normal']})")
@@ -537,6 +549,8 @@ def _engine(v):
     if v.get("note"):
         kind, text = v["note"]
         (st.success if kind == "good" else st.info)(text, icon="🎯" if kind == "good" else "🔎")
+    if v.get("warning"):
+        st.warning(v["warning"], icon="⚠️")
     b1, b2 = st.columns(2)
     with b1:
         if st.button("왜 그런가 ↗", width="stretch", key="d16_why"):
