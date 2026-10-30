@@ -1,0 +1,18 @@
+{
+  "wafermap_val_accuracy": 0.8871,
+  "macro_f1": 0.8366,
+  "per_class_accuracy": {
+    "none": 0.9364,
+    "center": 0.9006,
+    "donut": 0.9277,
+    "edge-loc": 0.7959,
+    "edge-ring": 0.9456,
+    "loc": 0.6438,
+    "near-full": 1.0,
+    "random": 0.9462,
+    "scratch": 0.7989
+  },
+  "data_source": "wm811k_pkl (WM811K.pkl)",
+  "n_samples": 40519,
+  "n_classes": 9
+}

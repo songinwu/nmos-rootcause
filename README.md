@@ -1,9 +1,11 @@
 # NMOS 원인 공정 추천 — 지식표 · 「얼마나」 · 합성 시험 · 시연 화면
 
 종합설계 「웨이퍼 불량 지도로 원인 공정 좁히기」에서 **NMOS 부분만** 뽑아 온 저장소예요.
-전체 코드(모양 CNN · 엔진 본체 · 대시보드)는 비공개 저장소에 있어서, 여기 파일은 **읽기용**이고 혼자서는 실행되지 않아요.
+엔진 본체 · 대시보드는 비공개 저장소에 있어서, 원인 표 쪽 파일은 **읽기용**이고 혼자서는 실행되지 않아요.
+**모양 CNN 학습 코드는 여기서 그대로 돌아가요** — 아래 [모양 CNN](#모양-cnn--학습-코드-2026-10-30)을 보세요.
 
-> **최신 — 2026-10-28** · 41단계(38 + SAB 3) · 측정 12칸 · 「얼마나」를 말하는 원인 8개 + 결함 밀도 · 시연 웨이퍼 17장.
+> **최신 — 2026-10-30** · 모양 CNN 학습 코드 추가.
+> **2026-10-28** · 41단계(38 + SAB 3) · 측정 12칸 · 「얼마나」를 말하는 원인 8개 + 결함 밀도 · 시연 웨이퍼 17장.
 > `docs/`의 PDF는 2판(38단계 · SAB 넣기 전)이에요. 그 뒤에 바뀐 점은 아래 [SAB 추가](#sab-추가-2026-10-28)를 보세요.
 
 ## 무엇을 했나
@@ -37,8 +39,13 @@
 | `src/dashboard/demo16.py` | 대시보드 섹션 16 시연 화면 (MOSCAP · CMOS · NMOS) |
 | `tests/test_rootcause_nmos.py` · `tests/test_nmos_device.py` · `tests/test_demo16_text.py` | 표 모양 · 대표 판정 · 크기 역산 · 시나리오가 엔진과 맞는지 |
 | `docs/…조원설명.pdf` | 조원 설명용 정리본 (2판) |
+| `src/training/train_wafermap.py` | 모양 CNN — 모델 구조 · WM-811K 읽기(26×26) · 웨이퍼 단위 분할 학습 |
+| `scripts/a1b_lotwise_model.py` · `scripts/a1_lot_consistency.py` | 모양 CNN — **lot 단위 분할 학습(시연 · 엔진이 쓰는 것)** · lot 뭉침 검정 |
+| `src/inference/wafermap_predictor.py` | 학습한 CNN으로 맵 한 장 판정 |
+| `scripts/download_wm811k.sh` · `requirements-cnn.txt` | WM-811K 받기(Kaggle) · 필요한 패키지 |
+| `results/cnn_lotwise.json` · `results/cnn_waferwise.json` | 두 학습의 결과 숫자 |
 
-엔진 본체(`rootcause_kb.score_batch`)와 모양 CNN은 이 저장소에 없어요.
+엔진 본체(`rootcause_kb.score_batch`)는 이 저장소에 없어요.
 엔진이 하는 일은 「모양으로 고른 후보 중에서, 칩 측정이 그 원인의 예상과 가장 잘 맞는 순서로 줄 세우기」예요.
 
 ## 결과 1 — 「어느 단계」를 바로 짚나 (합성 시험 N-1)
@@ -142,6 +149,45 @@ S/D 도즈가 30% 줄어도 면저항은 1.7%밖에 안 변해요(병렬 저항 
 ※ N4는 넣은 값이 90% 범위 밖이에요. 그 웨이퍼의 S/D 도즈가 정상 산포 끝(2.6σ)에서 뽑혔기 때문이고, 화면의 「정답 공개」 창에
 그 이유가 같이 나와요. 90% 범위는 10번에 1번꼴로 놓쳐요.
 
+## 모양 CNN — 학습 코드 (2026-10-30)
+
+엔진의 첫 단계예요. 웨이퍼맵 한 장(26×26)을 보고 모양 9종(none · center · donut · edge-loc · edge-ring · loc · near-full ·
+random · scratch) 중 하나로 판정하고, 그 모양이 원인 후보를 좁혀요.
+
+- **모델** — conv 3층 + 완전 연결 2층, 파라미터 약 62만 개(`WaferMapCNN`). 입력 값은 0 = 웨이퍼 밖 · 0.5 = 정상 칩 · 1.0 = 불량 칩.
+- **데이터** — WM-811K [11]의 라벨 있는 맵 172,950장. 크기가 제각각이라 26×26으로 줄여요(NEAREST). none이 85%라 학습에서는
+  15,000장으로 깎고, 클래스 가중 loss · 회전 · 반전을 써요. **데이터와 학습한 가중치는 저장소에 없어요** — 데이터는
+  `scripts/download_wm811k.sh`로 Kaggle에서 받아요.
+
+| 학습 | 나누는 법 | 고르는 기준 | 결과 | 쓰는 곳 |
+|---|---|---|---|---|
+| `src/training/train_wafermap.py` | 웨이퍼 단위 85 / 15 | val accuracy | val acc 0.887 · macro F1 0.837 (40,519장) | 처음 만든 판 |
+| `scripts/a1b_lotwise_model.py` | **lot 단위 70 / 15 / 15** | val macro F1 | **처음 보는 lot 1,615개 · 26,180장에서 acc 0.907 · macro F1 0.741** | 시연 · 엔진 |
+
+⚠️ 웨이퍼 단위로 나누면 같은 lot의 웨이퍼가 학습과 검증에 섞여 숫자가 좋게 나와요. 그래서 엔진은 lot 단위로 나눈 판을 써요.
+두 판은 나누는 법 · 고르는 기준 · 평가 셋이 함께 달라서 숫자를 바로 비교하면 안 돼요.
+
+```bash
+pip install -r requirements-cnn.txt
+bash scripts/download_wm811k.sh            # Kaggle API 키 필요 → data/raw/wm811k/WM811K.pkl
+python -m src.training.train_wafermap       # 웨이퍼 단위 판 → models/wafermap/wafermap_cnn.pt
+python scripts/a1b_lotwise_model.py         # lot 단위 판 → models/wafermap/wafermap_cnn_lotwise.pt
+```
+
+```python
+from src.inference.wafermap_predictor import WaferMapPredictor
+p = WaferMapPredictor("models/wafermap/wafermap_cnn_lotwise.pt")
+p.predict(wafer_map)   # 26×26, 값 0 / 0.5 / 1.0 → 모양 · 확신도
+```
+
+**NMOS 맵에 쓸 때 알아 둘 것**
+
+- WM-811K에는 **제품 종류와 웨이퍼 직경이 없어요**(컬럼 6개뿐). 웨이퍼당 칩 수가 1,266가지라 여러 제품이 섞인 양산 맵이에요.
+- CNN은 **모양(위치)만** 배워요. 모양은 장비 · 공정의 위치 불균일이 만들어서 제품과 상관없이 옮겨 써요.
+- **불량 칩 비율 · 칩당 결함 수는 옮기지 않아요.** 칩 설계(결함에 민감한 넓이)에 따라 같은 결함에도 죽는 비율이 달라서예요.
+  시연 N12의 「칩당 결함 수」는 이 맵의 칩 기준이에요.
+- 실제 NMOS 시험 웨이퍼는 불량 칩이 훨씬 적어 맵이 성글게 나올 수 있어요. 그런 맵에서는 다시 확인해야 해요.
+
 ## 근거는 어디까지 확실한가
 
 **문헌이 받쳐 주는 것은 주로 「맵 모양」까지이고, 「어느 측정이 바뀌나」는 대부분 소자 원리로 추론한 거예요.**
@@ -159,7 +205,7 @@ S/D 도즈가 30% 줄어도 면저항은 1.7%밖에 안 변해요(병렬 저항 
 틀어지면 웨이퍼 전체가 떨어진다」는 일반론) · 26(가장자리 링 모양은 원문, 면저항 쪽은 Riley 1996으로 보강) · 31(via · DRAM 구멍
 사례를 contact로 옮김) · 37(MOS 커패시터 실험).
 
-## 참고문헌 — 면저항 · silicide · 기준값 (복붙용)
+## 참고문헌 (복붙용)
 
 ```
 [1] A. Akheyar, A. Lauwers, R. Lindsay, M. de Potter, G. Tempel, K. Maex, "Analysis of Silicide/Diffusion Contact Resistance Making Use of Transmission Line Structures," Mat. Res. Soc. Symp. Proc., vol. 716, B1.10, 2002. DOI: 10.1557/PROC-716-B1.10
@@ -172,13 +218,14 @@ S/D 도즈가 30% 줄어도 면저항은 1.7%밖에 안 변해요(병렬 저항 
 [8] GlobalFoundries GF180MCU open PDK — Electrical Specifications 1.0 (3.3 V NMOS).
 [9] S.-T. Lin (Winbond Electronics), "Silicide block for ESD protection devices," US Patent 6,476,449 B1, 2002.
 [10] C. H. Stapper, F. M. Armstrong, K. Saji, "Integrated circuit yield statistics," Proceedings of the IEEE, vol. 71, no. 4, pp. 453–470, 1983.
+[11] M.-J. Wu, J.-S. R. Jang, J.-L. Chen, "Wafer map failure pattern recognition and similarity ranking for large-scale data sets," IEEE Transactions on Semiconductor Manufacturing, vol. 28, no. 1, pp. 1–12, 2015. DOI: 10.1109/TSM.2014.2364237
 ```
 
 ## 한계
 
 - **칩 측정과 WAT 값은 합성이에요.** WM-811K에는 맵만 있어요. 맵과 CNN 판정만 실측이에요.
 - **같은 표 · 같은 식으로 심고 채점했어요.** 그래서 「표와 식이 맞다면 이만큼」의 상한이에요.
-- **맵은 로직 웨이퍼(WM-811K)를 빌려 썼어요.** NMOS 공정에서 실제로 나온 맵이 아니에요.
+- **맵은 WM-811K 양산 맵에서 모양만 빌려 썼어요.** NMOS 공정에서 나온 맵이 아니고, 제품 종류와 직경은 데이터에 없어요.
 - **사고가 둘 겹치면 「얼마나」 역산이 틀려요.** 그래서 「다른 측정과 맞나」를 같이 봐요.
 - **사고가 겹치면 크기는 말하지 않아요.** 경고만 하고, 후보 단계들의 기록을 같이 보라고 해요.
 - **아직 안 한 것** — 21a gate 포토 초점의 측정 방향(Vt → on 전류), SAB 단계의 사고, 흩어짐(클린룸) · 긁힘(곡선 vs 직선) ·
