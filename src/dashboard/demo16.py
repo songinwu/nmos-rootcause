@@ -40,6 +40,8 @@ except ImportError:          # app.py와 같은 폴백 — streamlit을 src/dash
 API_URL = os.getenv("API_URL", "http://localhost:8000")
 MOSCAP_PATH = "data/demo/moscap_scenarios.json"
 NMOS_PATH = "data/demo/nmos_scenarios.json"
+CNN_TEST_PATH = "outputs/a1c_confusion.json"      # 처음 보는 lot(test)에서 잰 모양별 precision · recall — scripts/a1c_confusion
+CNN_WEAK = 0.6                                     # 이 모양이라고 한 것 중 맞은 비율이 이보다 낮으면 경고
 WORLDS = {"moscap": "우리가 만든 MOSCAP", "cmos": "CMOS 문헌 사례", "nmos": "NMOS 41단계"}
 JSON_PATH = {"moscap": MOSCAP_PATH, "nmos": NMOS_PATH}
 PAT_KO = {"none": "정상", "center": "가운데", "donut": "도넛", "edge-loc": "가장자리 일부",
@@ -63,6 +65,62 @@ def _moscap():
 
 def _nmos():
     return _json_at(NMOS_PATH, os.path.getmtime(NMOS_PATH))
+
+
+def _cnn_test() -> dict:
+    """모양별 {precision, recall, fp_normal}. fp_normal = 틀린 판정 중 실제로는 정상 웨이퍼였던 몫.
+    *(2026-10-30 교수 피드백)* 전체 정확도 90.7%만 보이면 긁힘 · 한 곳 뭉침처럼 약한 모양도 믿게 된다 —
+    긁힘은 CNN이 「긁힘」이라 한 것 중 13%만 실제 긁힘이었다. 파일이 없으면(공개 저장소 등) 아무것도 안 그린다."""
+    if not os.path.exists(CNN_TEST_PATH):
+        return {}
+    d = _json_at(CNN_TEST_PATH, os.path.getmtime(CNN_TEST_PATH))
+    cm, names = np.array(d["confusion_matrix"]), d["classes"]
+    out = {}
+    for j, c in enumerate(names):
+        fp = cm[:, j].sum() - cm[j, j]
+        out[c] = dict(d["per_class"][c], fp_normal=float(cm[0, j] / fp) if fp else 0.0)
+    return out
+
+
+def _josa(word: str, with_final: str, without: str) -> str:
+    """받침이 있으면 with_final(이라 · 을), 없으면 without(라 · 를)."""
+    ch = word[-1]
+    final = "가" <= ch <= "힣" and (ord(ch) - 0xAC00) % 28 != 0
+    return word + (with_final if final else without)
+
+
+def _cnn_weak_note(top: str) -> None:
+    """① 판정 아래 — 이 모양만의 성적을 보이고, 약하면 경고한다."""
+    q = _cnn_test().get(top)
+    if not q or top == "none":
+        return
+    name = PAT_KO.get(top, top)
+    q_name = f"「{name}」"
+    st.caption(f"{q_name} 판정만 보면 (처음 보는 lot) — CNN이 {_josa(q_name[:-1], '」이라', '」라')} 한 것 중 실제로 맞은 비율 "
+               f"**{q['precision'] * 100:.0f}%** · 실제 {_josa(q_name[:-1], '」을', '」를')} 찾아낸 비율 **{q['recall'] * 100:.0f}%**")
+    if q["precision"] < CNN_WEAK:
+        tail = " 틀린 것은 대부분 정상 웨이퍼였어요." if q["fp_normal"] > 0.5 else ""
+        st.warning(f"처음 보는 lot에서 CNN이 {_josa('「' + name, '」이라', '」라')} 한 웨이퍼 중 {q['precision'] * 100:.0f}%만 실제로 그 모양이었어요."
+                   f"{tail} 이 판정에서 나온 추천은 **후보**로만 보세요.", icon="⚠️")
+
+
+# fail 근거 — 「이 원인이면 칩이 이 측정으로 떨어진다」를 문헌이 말하나 (rootcause_kb_nmos.FAIL_EVIDENCE)
+FAIL_EV = {"✅": ("문헌", ui.GOOD, ""),
+           "🟡": ("문헌 일부", ui.WARN, "문헌은 불량이 는다는 데까지만 말하고, 어느 측정으로 떨어지는지는 판단이에요."),
+           "원리": ("원리", ui.INK_MUTED, "어느 측정으로 떨어지는지 문헌에 없어 소자 원리로 짐작했어요 — 후보로 보세요.")}
+
+
+def _fail_ev_tag(r, long: bool = False) -> str:
+    """NMOS 원인만 fail_evidence가 있다 — 없으면 빈 문자열."""
+    if r.get("fail_evidence") not in FAIL_EV:
+        return ""
+    label, col, note = FAIL_EV[r["fail_evidence"]]
+    tag = (f'<span style="border:1px solid {col};color:{col};border-radius:999px;padding:0 8px;font-size:12.5px;'
+           f'white-space:nowrap;">fail 근거 · {label}</span>')
+    if not long:
+        return " " + tag
+    return (f'<div style="font-size:13.5px;color:{ui.INK_MUTED};margin-top:4px;">{tag}'
+            + (f' {note}' if note else '') + '</div>')
 
 
 @st.cache_data(ttl=600)
@@ -155,6 +213,7 @@ def _view_nmos(sid):
                             **card[r["cause_id"]]))
     ev = [c["evidence"] for c in card.values()]
     n_src, n_moved = sum(e in ("원문", "일부") for e in ev), ev.count("옮김")
+    fev = [c.get("fail_evidence") for c in card.values()]      # 모양 근거(위)와 따로 — 「이 원인이면 어느 측정으로 떨어지나」의 근거
     return dict(
         world="nmos", id=sid, title=sc["title"], story=sc["story"],
         banner=("NMOS 트랜지스터 — 41단계(38 + SAB 3) · 마스크 6장으로 짠 공정",
@@ -176,7 +235,8 @@ def _view_nmos(sid):
                ("측정 결과", "합성 (지식표 방향)", False), ("WAT 값", "합성 (MOS 식)", False),
                ("공정 순서", "IDEC 0.5 µm + KSIA STI", True),
                ("원인 표", f"{len(card)}개 — 문헌 원문 {n_src} · 옮김 {n_moved} · 강의 · 원리 {len(card) - n_src - n_moved}",
-                False)])
+                False),
+               ("fail 근거", f"문헌 {fev.count('✅')} · 일부 {fev.count('🟡')} · 원리 {fev.count('원리')}", False)])
 
 
 # ── 부품 ─────────────────────────────────────────
@@ -553,7 +613,8 @@ def _engine(v):
             f'<div style="color:{ui.INK_MUTED};font-size:14px;">정상이면 — <span style="color:{ui.INK};">{r["normal"]}</span></div>'
             f'<div style="color:{ui.INK_MUTED};font-size:14px;margin-top:2px;">먼저 확인할 것 — '
             f'<span style="color:{ui.INK};">{" · ".join(r["checks"])}</span></div>'
-            + (_mag_line(r) if v["world"] == "nmos" else ""))
+            + (_mag_line(r) if v["world"] == "nmos" else "")
+            + _fail_ev_tag(r, long=True))
     st.markdown(
         f'<div style="border:1px solid {ui.BORDER};background:{ui.SURFACE};border-radius:10px;padding:8px 14px 10px;">'
         f'<div style="color:{ui.INK_MUTED};font-size:14px;">③ 엔진이 말하는 것</div>'
@@ -563,7 +624,7 @@ def _engine(v):
         f'<div style="border-left:3px solid {RANK_COLOR[min(r["rank"] - 1, 2)]};padding:2px 9px;margin:5px 0;font-size:14.5px;">'
         f'<b style="color:{RANK_COLOR[min(r["rank"] - 1, 2)]};">{_rank_label(r)}</b>'
         f'<span style="color:{ui.INK_MUTED};"> · {r["step_name"]} — </span>'
-        f'<span style="color:{ui.INK};">{r["suspect"]}</span></div>' for r in rest), unsafe_allow_html=True)
+        f'<span style="color:{ui.INK};">{r["suspect"]}</span>{_fail_ev_tag(r)}</div>' for r in rest), unsafe_allow_html=True)
     if v.get("note"):
         kind, text = v["note"]
         (st.success if kind == "good" else st.info)(text, icon="🎯" if kind == "good" else "🔎")
@@ -666,6 +727,7 @@ def _step1(v):
         st.markdown(f"#### CNN 판정 — {PAT_KO.get(top, top)} {conf:.1f}%")
         _prob(v, key="d16_prob")
         st.caption("CNN — 합성곱 3층 · lot 단위로 나눈 시험(처음 보는 lot 1,615개)에서 정확도 90.7% · macro F1 0.741")
+        _cnn_weak_note(top)
 
 
 def _step2(v):
@@ -699,6 +761,10 @@ def _step3(v):
                     f'<b style="color:{ui.INK};font-size:16px;">{PAT_KO.get(top, top)} {conf:.0f}%</b>'
                     f' · 그다음 {" · ".join(f"{PAT_KO.get(p, p)} {x:.0f}%" for p, x in nxt)}</div>',
                     unsafe_allow_html=True)
+        q = _cnn_test().get(top)
+        if q and top != "none" and q["precision"] < CNN_WEAK:
+            st.markdown(f'<div style="font-size:13.5px;color:{ui.WARN};">⚠️ 「{PAT_KO.get(top, top)}」 판정은 처음 보는 lot에서 '
+                        f'{q["precision"] * 100:.0f}%만 맞았어요 — 아래 추천은 후보로 보세요</div>', unsafe_allow_html=True)
         _map(v, key="d16_map")
         rule = v.get("bin_rule", "검사 순서대로 처음 걸린 것")
         st.markdown(f'<div style="font-size:14.5px;color:{ui.INK_MUTED};margin-top:-4px;">② 무엇으로 떨어졌나 '

@@ -120,6 +120,9 @@ def main():
              "true_pattern_4": judge(onehot, nk.collapse4(counts), ci, nk.SIGNATURES4),
              "cnn_11": judge(Pc, counts, ci, None),
              "cnn_4": judge(Pc, nk.collapse4(counts), ci, nk.SIGNATURES4),
+             # 비교 기준(2026-10-30) — 검사 결과 없이 모양만 넣으면 몇 개를 짚나. 난수를 쓰지 않아 위 숫자는 그대로다
+             "pattern_only": judge(onehot, np.zeros_like(counts), ci, None),
+             "cnn_pattern_only": judge(Pc, np.zeros_like(counts), ci, None),
              "cnn_pattern_acc": float((Pc.argmax(1) == pi).mean())}
         for s in SHARES:
             if s == nk.PRIMARY_SHARE:
@@ -133,7 +136,11 @@ def main():
               f"{r['cnn_11']['solo']*100:5.1f}% 공동 안 {r['cnn_11']['tie_in']*100:5.1f}% | 30% {r['share30_cnn_11']['solo']*100:5.1f}"
               f" · 70% {r['share70_cnn_11']['solo']*100:5.1f}")
     cs = list(res["causes"].values())
-    summ = {k: summarize(cs, k) for k in ("true_pattern_11", "true_pattern_4", "cnn_11", "cnn_4")}
+    summ = {k: summarize(cs, k) for k in ("true_pattern_11", "true_pattern_4", "cnn_11", "cnn_4",
+                                          "pattern_only", "cnn_pattern_only")}
+    # 무작위로 하나 고르면: 단독 1위 1/K · 3순위 안 3/K — 원인마다 같으므로 90% 넘는 원인은 0개
+    summ["random"] = {"identified_ge90": 0, "identified_ge50": 0, "mean_solo": 1 / nk.K, "mean_tie_in": 1 / nk.K,
+                      "mean_top3": 3 / nk.K}
     for s in SHARES:
         if s != nk.PRIMARY_SHARE:
             for k in ("true_pattern_11", "cnn_11"):

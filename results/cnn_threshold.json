@@ -1,0 +1,277 @@
+{
+ "setup": {
+  "pick_on": "validation lots 1,614 · wafers 25,772",
+  "report_on": "test lots 1,615 · wafers 26,180",
+  "rule": "1위가 불량 모양 c이고 P(c) < τ_c 이면 none",
+  "criterion": "검증용 lot에서 모양별 F1 최대",
+  "bootstrap": {
+   "unit": "test lot",
+   "n": 1000,
+   "seed": 42
+  }
+ },
+ "thresholds": {
+  "center": 0.79,
+  "donut": 0.84,
+  "edge-loc": 0.61,
+  "edge-ring": 0.79,
+  "loc": 0.53,
+  "near-full": 0.0,
+  "random": 0.69,
+  "scratch": 0.8
+ },
+ "before": {
+  "accuracy": 0.9068,
+  "macro_f1": 0.7407,
+  "normal_flagged": 1950,
+  "defect_missed": 208,
+  "n_normal": 22307,
+  "n_defect": 3873,
+  "per_class": {
+   "none": {
+    "n": 22307,
+    "precision": 0.9899,
+    "recall": 0.9126,
+    "precision_ci95": [
+     0.9883,
+     0.9916
+    ],
+    "recall_ci95": [
+     0.9048,
+     0.9204
+    ]
+   },
+   "center": {
+    "n": 648,
+    "precision": 0.6659,
+    "recall": 0.9043,
+    "precision_ci95": [
+     0.6156,
+     0.7112
+    ],
+    "recall_ci95": [
+     0.8777,
+     0.9273
+    ]
+   },
+   "donut": {
+    "n": 71,
+    "precision": 0.7033,
+    "recall": 0.9014,
+    "precision_ci95": [
+     0.5147,
+     0.8268
+    ],
+    "recall_ci95": [
+     0.7895,
+     0.9692
+    ]
+   },
+   "edge-loc": {
+    "n": 742,
+    "precision": 0.522,
+    "recall": 0.7844,
+    "precision_ci95": [
+     0.4751,
+     0.5639
+    ],
+    "recall_ci95": [
+     0.7476,
+     0.819
+    ]
+   },
+   "edge-ring": {
+    "n": 1605,
+    "precision": 0.9054,
+    "recall": 0.9664,
+    "precision_ci95": [
+     0.8698,
+     0.9323
+    ],
+    "recall_ci95": [
+     0.9506,
+     0.9796
+    ]
+   },
+   "loc": {
+    "n": 493,
+    "precision": 0.5117,
+    "recall": 0.7079,
+    "precision_ci95": [
+     0.4648,
+     0.5611
+    ],
+    "recall_ci95": [
+     0.6622,
+     0.75
+    ]
+   },
+   "near-full": {
+    "n": 19,
+    "precision": 0.9,
+    "recall": 0.9474,
+    "precision_ci95": [
+     0.75,
+     1.0
+    ],
+    "recall_ci95": [
+     0.8333,
+     1.0
+    ]
+   },
+   "random": {
+    "n": 114,
+    "precision": 0.8226,
+    "recall": 0.8947,
+    "precision_ci95": [
+     0.6562,
+     0.9248
+    ],
+    "recall_ci95": [
+     0.8021,
+     0.947
+    ]
+   },
+   "scratch": {
+    "n": 181,
+    "precision": 0.1323,
+    "recall": 0.7238,
+    "precision_ci95": [
+     0.1047,
+     0.1669
+    ],
+    "recall_ci95": [
+     0.6605,
+     0.7892
+    ]
+   }
+  }
+ },
+ "after": {
+  "accuracy": 0.9511,
+  "macro_f1": 0.7975,
+  "normal_flagged": 516,
+  "defect_missed": 644,
+  "n_normal": 22307,
+  "n_defect": 3873,
+  "per_class": {
+   "none": {
+    "n": 22307,
+    "precision": 0.9713,
+    "recall": 0.9769,
+    "precision_ci95": [
+     0.9682,
+     0.9744
+    ],
+    "recall_ci95": [
+     0.9744,
+     0.9793
+    ]
+   },
+   "center": {
+    "n": 648,
+    "precision": 0.905,
+    "recall": 0.8086,
+    "precision_ci95": [
+     0.8729,
+     0.9333
+    ],
+    "recall_ci95": [
+     0.7676,
+     0.8442
+    ]
+   },
+   "donut": {
+    "n": 71,
+    "precision": 0.8333,
+    "recall": 0.7746,
+    "precision_ci95": [
+     0.6664,
+     0.9296
+    ],
+    "recall_ci95": [
+     0.5769,
+     0.8778
+    ]
+   },
+   "edge-loc": {
+    "n": 742,
+    "precision": 0.668,
+    "recall": 0.6968,
+    "precision_ci95": [
+     0.6211,
+     0.7117
+    ],
+    "recall_ci95": [
+     0.6536,
+     0.7392
+    ]
+   },
+   "edge-ring": {
+    "n": 1605,
+    "precision": 0.9647,
+    "recall": 0.9377,
+    "precision_ci95": [
+     0.9452,
+     0.9793
+    ],
+    "recall_ci95": [
+     0.9092,
+     0.9604
+    ]
+   },
+   "loc": {
+    "n": 493,
+    "precision": 0.6489,
+    "recall": 0.641,
+    "precision_ci95": [
+     0.6008,
+     0.6992
+    ],
+    "recall_ci95": [
+     0.5919,
+     0.6892
+    ]
+   },
+   "near-full": {
+    "n": 19,
+    "precision": 0.9,
+    "recall": 0.9474,
+    "precision_ci95": [
+     0.75,
+     1.0
+    ],
+    "recall_ci95": [
+     0.8333,
+     1.0
+    ]
+   },
+   "random": {
+    "n": 114,
+    "precision": 0.9238,
+    "recall": 0.8509,
+    "precision_ci95": [
+     0.8107,
+     0.9899
+    ],
+    "recall_ci95": [
+     0.738,
+     0.9187
+    ]
+   },
+   "scratch": {
+    "n": 181,
+    "precision": 0.5,
+    "recall": 0.4254,
+    "precision_ci95": [
+     0.4138,
+     0.5839
+    ],
+    "recall_ci95": [
+     0.3485,
+     0.5061
+    ]
+   }
+  }
+ }
+}
