@@ -14,7 +14,7 @@
 
 MOSCAP은 data/demo/moscap_scenarios.json(scripts/make_moscap_scenarios.py — 실제 맵 · CNN 실제 추론 · 합성 bin ·
 MOSCAP 지식표 순위 · 화면 문구)을, CMOS는 진단 API(/demo/rootcause/{id} — 섹션 14와 같은 엔진)를 읽는다.
-NMOS *(2026-10-28)* 는 data/demo/nmos_scenarios.json(scripts/make_nmos_scenarios.py — 41단계(38 + SAB 3) · 측정 12칸 · 원인 40개)을
+NMOS *(2026-10-28)* 는 data/demo/nmos_scenarios.json(scripts/make_nmos_scenarios.py — 41단계(38 + SAB 3) · 측정 12칸 · 원인 39개 — 2026-10-30 fail 라벨 다시 붙이기)을
 읽는다. 칸이 11개라 색을 시나리오 파일에서 받고, 만드는 순서는 38줄 대신 공정 묶음 7개에 단계 칩으로 보인다.
 *(2026-10-28 보강 — 「얼마나」)* NMOS는 ② 단계에 웨이퍼 WAT 값(Vt · SS · on 전류 · C-V 산화막)을 같이 보이고, ③ 엔진 칸에
 「얼마나 — 어느 파라미터가 얼마나 · 90% 범위 · 정상 범위 · 다른 측정과 맞나」를 붙인다. 크기를 못 재는 원인은 왜 못 재는지

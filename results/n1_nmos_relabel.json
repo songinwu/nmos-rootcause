@@ -1,0 +1,2352 @@
+{
+ "setup": {
+  "n_per_cause": 200,
+  "label_shares": [
+   0.3,
+   0.5,
+   0.7
+  ],
+  "engine_share": 0.5,
+  "K": 39,
+  "bins": 12,
+  "seed": 42,
+  "maps": "A-1b lot 단위 분할의 test lot만 (적은 모양은 회전 · 뒤집기 8배)",
+  "note": "50% 라벨 · 50% 엔진은 같은 표 — 상한"
+ },
+ "pools": {
+  "edge-loc": {
+   "test_maps": 742,
+   "augmented": false,
+   "pool": 742
+  },
+  "near-full": {
+   "test_maps": 19,
+   "augmented": true,
+   "pool": 152
+  },
+  "edge-ring": {
+   "test_maps": 1605,
+   "augmented": false,
+   "pool": 1605
+  },
+  "loc": {
+   "test_maps": 493,
+   "augmented": false,
+   "pool": 493
+  },
+  "donut": {
+   "test_maps": 71,
+   "augmented": true,
+   "pool": 568
+  },
+  "center": {
+   "test_maps": 648,
+   "augmented": false,
+   "pool": 648
+  },
+  "scratch": {
+   "test_maps": 181,
+   "augmented": true,
+   "pool": 1448
+  },
+  "random": {
+   "test_maps": 114,
+   "augmented": true,
+   "pool": 912
+  }
+ },
+ "causes": {
+  "n01_bevel": {
+   "name": "기판 테두리 + 질화막 박리",
+   "pattern": "edge-loc",
+   "evidence": "원문",
+   "fail_evidence": "🟡",
+   "pred_unique11": true,
+   "pred_unique4": true,
+   "true_pattern_11": {
+    "solo": 0.985,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 1.015
+   },
+   "true_pattern_4": {
+    "solo": 0.995,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 1.005
+   },
+   "cnn_11": {
+    "solo": 0.97,
+    "tie_in": 0.985,
+    "top3": 0.995,
+    "mean_tie_size": 1.02
+   },
+   "cnn_4": {
+    "solo": 0.93,
+    "tie_in": 0.935,
+    "top3": 0.955,
+    "mean_tie_size": 1.1
+   },
+   "cnn_pattern_acc": 0.8,
+   "share30_true_pattern_11": {
+    "solo": 0.64,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 1.36
+   },
+   "share30_cnn_11": {
+    "solo": 0.6,
+    "tie_in": 0.915,
+    "top3": 0.95,
+    "mean_tie_size": 1.44
+   },
+   "share70_true_pattern_11": {
+    "solo": 1.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 1.0
+   },
+   "share70_cnn_11": {
+    "solo": 0.99,
+    "tie_in": 0.99,
+    "top3": 0.99,
+    "mean_tie_size": 1.01
+   }
+  },
+  "n02_clean_metal": {
+   "name": "세정 금속 오염",
+   "pattern": "near-full",
+   "evidence": "강의",
+   "fail_evidence": "원리",
+   "pred_unique11": true,
+   "pred_unique4": false,
+   "true_pattern_11": {
+    "solo": 1.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 1.0
+   },
+   "true_pattern_4": {
+    "solo": 0.05,
+    "tie_in": 0.09,
+    "top3": 0.07,
+    "mean_tie_size": 5.79
+   },
+   "cnn_11": {
+    "solo": 0.99,
+    "tie_in": 0.99,
+    "top3": 1.0,
+    "mean_tie_size": 1.01
+   },
+   "cnn_4": {
+    "solo": 0.045,
+    "tie_in": 0.085,
+    "top3": 0.065,
+    "mean_tie_size": 5.635
+   },
+   "cnn_pattern_acc": 0.955,
+   "share30_true_pattern_11": {
+    "solo": 1.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 1.0
+   },
+   "share30_cnn_11": {
+    "solo": 0.955,
+    "tie_in": 0.96,
+    "top3": 0.995,
+    "mean_tie_size": 1.05
+   },
+   "share70_true_pattern_11": {
+    "solo": 1.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 1.0
+   },
+   "share70_cnn_11": {
+    "solo": 1.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 1.0
+   }
+  },
+  "n05_active_focus": {
+   "name": "활성 영역 포토 가장자리 초점",
+   "pattern": "edge-ring",
+   "evidence": "원리",
+   "fail_evidence": "원리",
+   "pred_unique11": false,
+   "pred_unique4": false,
+   "true_pattern_11": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 2.0
+   },
+   "true_pattern_4": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 3.0
+   },
+   "cnn_11": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 2.0
+   },
+   "cnn_4": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 3.0
+   },
+   "cnn_pattern_acc": 0.97,
+   "share30_true_pattern_11": {
+    "solo": 0.0,
+    "tie_in": 0.995,
+    "top3": 1.0,
+    "mean_tie_size": 2.1
+   },
+   "share30_cnn_11": {
+    "solo": 0.0,
+    "tie_in": 0.995,
+    "top3": 1.0,
+    "mean_tie_size": 2.1
+   },
+   "share70_true_pattern_11": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 2.0
+   },
+   "share70_cnn_11": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 2.0
+   }
+  },
+  "n06_nit_etch_under": {
+   "name": "질화막 · pad 식각 부족",
+   "pattern": "near-full",
+   "evidence": "강의",
+   "fail_evidence": "원리",
+   "pred_unique11": true,
+   "pred_unique4": false,
+   "true_pattern_11": {
+    "solo": 1.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 1.0
+   },
+   "true_pattern_4": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 6.005
+   },
+   "cnn_11": {
+    "solo": 0.93,
+    "tie_in": 0.93,
+    "top3": 0.93,
+    "mean_tie_size": 1.07
+   },
+   "cnn_4": {
+    "solo": 0.0,
+    "tie_in": 0.93,
+    "top3": 0.93,
+    "mean_tie_size": 5.725
+   },
+   "cnn_pattern_acc": 0.93,
+   "share30_true_pattern_11": {
+    "solo": 1.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 1.0
+   },
+   "share30_cnn_11": {
+    "solo": 0.93,
+    "tie_in": 0.93,
+    "top3": 0.93,
+    "mean_tie_size": 1.07
+   },
+   "share70_true_pattern_11": {
+    "solo": 1.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 1.0
+   },
+   "share70_cnn_11": {
+    "solo": 0.93,
+    "tie_in": 0.93,
+    "top3": 0.93,
+    "mean_tie_size": 1.07
+   }
+  },
+  "n07_trench_edge": {
+   "name": "trench 식각 가장자리 얕음",
+   "pattern": "edge-ring",
+   "evidence": "강의",
+   "fail_evidence": "원리",
+   "pred_unique11": true,
+   "pred_unique4": false,
+   "true_pattern_11": {
+    "solo": 0.995,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 1.04
+   },
+   "true_pattern_4": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 4.0
+   },
+   "cnn_11": {
+    "solo": 0.99,
+    "tie_in": 0.995,
+    "top3": 1.0,
+    "mean_tie_size": 1.045
+   },
+   "cnn_4": {
+    "solo": 0.0,
+    "tie_in": 0.95,
+    "top3": 0.965,
+    "mean_tie_size": 3.855
+   },
+   "cnn_pattern_acc": 0.955,
+   "share30_true_pattern_11": {
+    "solo": 0.96,
+    "tie_in": 0.995,
+    "top3": 1.0,
+    "mean_tie_size": 1.28
+   },
+   "share30_cnn_11": {
+    "solo": 0.925,
+    "tie_in": 0.96,
+    "top3": 0.985,
+    "mean_tie_size": 1.285
+   },
+   "share70_true_pattern_11": {
+    "solo": 1.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 1.0
+   },
+   "share70_cnn_11": {
+    "solo": 0.995,
+    "tie_in": 0.995,
+    "top3": 1.0,
+    "mean_tie_size": 1.005
+   }
+  },
+  "n08_pr_residue": {
+   "name": "STI 포토 뒤 PR 찌꺼기",
+   "pattern": "loc",
+   "evidence": "원리",
+   "fail_evidence": "원리",
+   "pred_unique11": false,
+   "pred_unique4": false,
+   "true_pattern_11": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 2.03
+   },
+   "true_pattern_4": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 2.06
+   },
+   "cnn_11": {
+    "solo": 0.0,
+    "tie_in": 0.98,
+    "top3": 0.99,
+    "mean_tie_size": 2.0
+   },
+   "cnn_4": {
+    "solo": 0.0,
+    "tie_in": 0.77,
+    "top3": 0.925,
+    "mean_tie_size": 1.885
+   },
+   "cnn_pattern_acc": 0.715,
+   "share30_true_pattern_11": {
+    "solo": 0.0,
+    "tie_in": 0.995,
+    "top3": 0.995,
+    "mean_tie_size": 2.255
+   },
+   "share30_cnn_11": {
+    "solo": 0.0,
+    "tie_in": 0.89,
+    "top3": 0.94,
+    "mean_tie_size": 2.095
+   },
+   "share70_true_pattern_11": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 2.02
+   },
+   "share70_cnn_11": {
+    "solo": 0.0,
+    "tie_in": 0.99,
+    "top3": 0.995,
+    "mean_tie_size": 2.005
+   }
+  },
+  "n09_liner_skip": {
+   "name": "liner 산화 생략",
+   "pattern": "near-full",
+   "evidence": "원리",
+   "fail_evidence": "원리",
+   "pred_unique11": false,
+   "pred_unique4": false,
+   "true_pattern_11": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 4.0
+   },
+   "true_pattern_4": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 0.995,
+    "mean_tie_size": 6.005
+   },
+   "cnn_11": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 4.055
+   },
+   "cnn_4": {
+    "solo": 0.0,
+    "tie_in": 0.945,
+    "top3": 0.94,
+    "mean_tie_size": 5.785
+   },
+   "cnn_pattern_acc": 0.945,
+   "share30_true_pattern_11": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 4.005
+   },
+   "share30_cnn_11": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 4.06
+   },
+   "share70_true_pattern_11": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 4.0
+   },
+   "share70_cnn_11": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 4.055
+   }
+  },
+  "n10_fill_void": {
+   "name": "trench 채우기 빈 곳 · 입자",
+   "pattern": "loc",
+   "evidence": "원문",
+   "fail_evidence": "원리",
+   "pred_unique11": false,
+   "pred_unique4": false,
+   "true_pattern_11": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 2.11
+   },
+   "true_pattern_4": {
+    "solo": 0.0,
+    "tie_in": 0.995,
+    "top3": 0.995,
+    "mean_tie_size": 2.065
+   },
+   "cnn_11": {
+    "solo": 0.0,
+    "tie_in": 0.965,
+    "top3": 0.97,
+    "mean_tie_size": 2.045
+   },
+   "cnn_4": {
+    "solo": 0.0,
+    "tie_in": 0.76,
+    "top3": 0.875,
+    "mean_tie_size": 1.865
+   },
+   "cnn_pattern_acc": 0.725,
+   "share30_true_pattern_11": {
+    "solo": 0.0,
+    "tie_in": 0.99,
+    "top3": 1.0,
+    "mean_tie_size": 2.25
+   },
+   "share30_cnn_11": {
+    "solo": 0.0,
+    "tie_in": 0.87,
+    "top3": 0.92,
+    "mean_tie_size": 2.07
+   },
+   "share70_true_pattern_11": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 2.01
+   },
+   "share70_cnn_11": {
+    "solo": 0.0,
+    "tie_in": 0.995,
+    "top3": 0.995,
+    "mean_tie_size": 2.0
+   }
+  },
+  "n11_densify_skip": {
+   "name": "치밀화 열처리 생략",
+   "pattern": "near-full",
+   "evidence": "원리",
+   "fail_evidence": "원리",
+   "pred_unique11": false,
+   "pred_unique4": false,
+   "true_pattern_11": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 4.0
+   },
+   "true_pattern_4": {
+    "solo": 0.0,
+    "tie_in": 0.995,
+    "top3": 0.36,
+    "mean_tie_size": 5.975
+   },
+   "cnn_11": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 4.045
+   },
+   "cnn_4": {
+    "solo": 0.0,
+    "tie_in": 0.95,
+    "top3": 0.37,
+    "mean_tie_size": 5.795
+   },
+   "cnn_pattern_acc": 0.955,
+   "share30_true_pattern_11": {
+    "solo": 0.0,
+    "tie_in": 0.985,
+    "top3": 1.0,
+    "mean_tie_size": 3.96
+   },
+   "share30_cnn_11": {
+    "solo": 0.0,
+    "tie_in": 0.985,
+    "top3": 1.0,
+    "mean_tie_size": 4.0
+   },
+   "share70_true_pattern_11": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 4.0
+   },
+   "share70_cnn_11": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 4.045
+   }
+  },
+  "n12_sti_cmp_edge": {
+   "name": "STI CMP 가장자리 과연마",
+   "pattern": "edge-ring",
+   "evidence": "옮김",
+   "fail_evidence": "원리",
+   "pred_unique11": true,
+   "pred_unique4": false,
+   "true_pattern_11": {
+    "solo": 1.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 1.0
+   },
+   "true_pattern_4": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 4.0
+   },
+   "cnn_11": {
+    "solo": 1.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 1.0
+   },
+   "cnn_4": {
+    "solo": 0.0,
+    "tie_in": 0.925,
+    "top3": 0.935,
+    "mean_tie_size": 3.775
+   },
+   "cnn_pattern_acc": 0.945,
+   "share30_true_pattern_11": {
+    "solo": 0.975,
+    "tie_in": 0.995,
+    "top3": 1.0,
+    "mean_tie_size": 1.165
+   },
+   "share30_cnn_11": {
+    "solo": 0.975,
+    "tie_in": 0.995,
+    "top3": 1.0,
+    "mean_tie_size": 1.165
+   },
+   "share70_true_pattern_11": {
+    "solo": 1.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 1.0
+   },
+   "share70_cnn_11": {
+    "solo": 1.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 1.0
+   }
+  },
+  "n13_nit_residue": {
+   "name": "질화막 잔류",
+   "pattern": "loc",
+   "evidence": "원리",
+   "fail_evidence": "원리",
+   "pred_unique11": true,
+   "pred_unique4": true,
+   "true_pattern_11": {
+    "solo": 0.9,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 1.3
+   },
+   "true_pattern_4": {
+    "solo": 0.9,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 1.3
+   },
+   "cnn_11": {
+    "solo": 0.9,
+    "tie_in": 0.96,
+    "top3": 0.96,
+    "mean_tie_size": 1.22
+   },
+   "cnn_4": {
+    "solo": 0.9,
+    "tie_in": 0.955,
+    "top3": 0.955,
+    "mean_tie_size": 1.21
+   },
+   "cnn_pattern_acc": 0.725,
+   "share30_true_pattern_11": {
+    "solo": 0.545,
+    "tie_in": 0.99,
+    "top3": 0.995,
+    "mean_tie_size": 2.355
+   },
+   "share30_cnn_11": {
+    "solo": 0.545,
+    "tie_in": 0.82,
+    "top3": 0.82,
+    "mean_tie_size": 1.99
+   },
+   "share70_true_pattern_11": {
+    "solo": 0.96,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 1.12
+   },
+   "share70_cnn_11": {
+    "solo": 0.96,
+    "tie_in": 0.98,
+    "top3": 0.98,
+    "mean_tie_size": 1.08
+   }
+  },
+  "n14_padox_overetch": {
+   "name": "pad oxide 과식각 (divot)",
+   "pattern": "near-full",
+   "evidence": "원리",
+   "fail_evidence": "원리",
+   "pred_unique11": false,
+   "pred_unique4": false,
+   "true_pattern_11": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 4.0
+   },
+   "true_pattern_4": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 0.0,
+    "mean_tie_size": 6.0
+   },
+   "cnn_11": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 4.065
+   },
+   "cnn_4": {
+    "solo": 0.0,
+    "tie_in": 0.935,
+    "top3": 0.0,
+    "mean_tie_size": 5.74
+   },
+   "cnn_pattern_acc": 0.935,
+   "share30_true_pattern_11": {
+    "solo": 0.0,
+    "tie_in": 0.985,
+    "top3": 0.985,
+    "mean_tie_size": 3.955
+   },
+   "share30_cnn_11": {
+    "solo": 0.0,
+    "tie_in": 0.985,
+    "top3": 0.985,
+    "mean_tie_size": 4.02
+   },
+   "share70_true_pattern_11": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 4.0
+   },
+   "share70_cnn_11": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 4.065
+   }
+  },
+  "n15_screen_skip": {
+   "name": "screen oxide 생략 (채널링)",
+   "pattern": "near-full",
+   "evidence": "강의",
+   "fail_evidence": "원리",
+   "pred_unique11": true,
+   "pred_unique4": false,
+   "true_pattern_11": {
+    "solo": 1.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 1.0
+   },
+   "true_pattern_4": {
+    "solo": 0.11,
+    "tie_in": 0.2,
+    "top3": 1.0,
+    "mean_tie_size": 1.98
+   },
+   "cnn_11": {
+    "solo": 1.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 1.0
+   },
+   "cnn_4": {
+    "solo": 0.105,
+    "tie_in": 0.19,
+    "top3": 0.965,
+    "mean_tie_size": 1.945
+   },
+   "cnn_pattern_acc": 0.965,
+   "share30_true_pattern_11": {
+    "solo": 0.985,
+    "tie_in": 0.99,
+    "top3": 1.0,
+    "mean_tie_size": 1.005
+   },
+   "share30_cnn_11": {
+    "solo": 0.95,
+    "tie_in": 0.955,
+    "top3": 0.995,
+    "mean_tie_size": 1.005
+   },
+   "share70_true_pattern_11": {
+    "solo": 1.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 1.0
+   },
+   "share70_cnn_11": {
+    "solo": 1.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 1.0
+   }
+  },
+  "n16_vt_dose": {
+   "name": "Vt 주입 도즈 이탈",
+   "pattern": "near-full",
+   "evidence": "원문",
+   "fail_evidence": "✅",
+   "pred_unique11": true,
+   "pred_unique4": false,
+   "true_pattern_11": {
+    "solo": 1.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 1.0
+   },
+   "true_pattern_4": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 2.0
+   },
+   "cnn_11": {
+    "solo": 1.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 1.0
+   },
+   "cnn_4": {
+    "solo": 0.0,
+    "tie_in": 0.99,
+    "top3": 1.0,
+    "mean_tie_size": 1.99
+   },
+   "cnn_pattern_acc": 0.98,
+   "share30_true_pattern_11": {
+    "solo": 0.98,
+    "tie_in": 0.985,
+    "top3": 1.0,
+    "mean_tie_size": 1.01
+   },
+   "share30_cnn_11": {
+    "solo": 0.96,
+    "tie_in": 0.965,
+    "top3": 0.98,
+    "mean_tie_size": 1.01
+   },
+   "share70_true_pattern_11": {
+    "solo": 1.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 1.0
+   },
+   "share70_cnn_11": {
+    "solo": 1.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 1.0
+   }
+  },
+  "n17_screen_residue": {
+   "name": "screen oxide 잔막",
+   "pattern": "near-full",
+   "evidence": "원리",
+   "fail_evidence": "원리",
+   "pred_unique11": false,
+   "pred_unique4": false,
+   "true_pattern_11": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 2.0
+   },
+   "true_pattern_4": {
+    "solo": 0.0,
+    "tie_in": 0.975,
+    "top3": 1.0,
+    "mean_tie_size": 1.98
+   },
+   "cnn_11": {
+    "solo": 0.0,
+    "tie_in": 0.96,
+    "top3": 0.96,
+    "mean_tie_size": 1.96
+   },
+   "cnn_4": {
+    "solo": 0.0,
+    "tie_in": 0.935,
+    "top3": 0.96,
+    "mean_tie_size": 1.94
+   },
+   "cnn_pattern_acc": 0.96,
+   "share30_true_pattern_11": {
+    "solo": 0.0,
+    "tie_in": 0.28,
+    "top3": 1.0,
+    "mean_tie_size": 1.3
+   },
+   "share30_cnn_11": {
+    "solo": 0.0,
+    "tie_in": 0.27,
+    "top3": 0.96,
+    "mean_tie_size": 1.29
+   },
+   "share70_true_pattern_11": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 2.0
+   },
+   "share70_cnn_11": {
+    "solo": 0.0,
+    "tie_in": 0.96,
+    "top3": 0.96,
+    "mean_tie_size": 1.96
+   }
+  },
+  "n19_gox_thick": {
+   "name": "gate 산화 두께 이탈",
+   "pattern": "near-full",
+   "evidence": "원문",
+   "fail_evidence": "✅",
+   "pred_unique11": false,
+   "pred_unique4": false,
+   "true_pattern_11": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 2.0
+   },
+   "true_pattern_4": {
+    "solo": 0.0,
+    "tie_in": 0.98,
+    "top3": 1.0,
+    "mean_tie_size": 2.0
+   },
+   "cnn_11": {
+    "solo": 0.0,
+    "tie_in": 0.925,
+    "top3": 0.925,
+    "mean_tie_size": 1.925
+   },
+   "cnn_4": {
+    "solo": 0.0,
+    "tie_in": 0.91,
+    "top3": 0.925,
+    "mean_tie_size": 1.93
+   },
+   "cnn_pattern_acc": 0.925,
+   "share30_true_pattern_11": {
+    "solo": 0.0,
+    "tie_in": 0.28,
+    "top3": 1.0,
+    "mean_tie_size": 1.3
+   },
+   "share30_cnn_11": {
+    "solo": 0.0,
+    "tie_in": 0.24,
+    "top3": 0.925,
+    "mean_tie_size": 1.25
+   },
+   "share70_true_pattern_11": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 2.0
+   },
+   "share70_cnn_11": {
+    "solo": 0.0,
+    "tie_in": 0.925,
+    "top3": 0.925,
+    "mean_tie_size": 1.925
+   }
+  },
+  "n20_poly_doping": {
+   "name": "poly 도핑 부족",
+   "pattern": "near-full",
+   "evidence": "원리",
+   "fail_evidence": "원리",
+   "pred_unique11": true,
+   "pred_unique4": false,
+   "true_pattern_11": {
+    "solo": 1.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 1.0
+   },
+   "true_pattern_4": {
+    "solo": 0.915,
+    "tie_in": 0.945,
+    "top3": 1.0,
+    "mean_tie_size": 1.115
+   },
+   "cnn_11": {
+    "solo": 0.96,
+    "tie_in": 0.96,
+    "top3": 0.975,
+    "mean_tie_size": 1.0
+   },
+   "cnn_4": {
+    "solo": 0.88,
+    "tie_in": 0.91,
+    "top3": 0.96,
+    "mean_tie_size": 1.11
+   },
+   "cnn_pattern_acc": 0.96,
+   "share30_true_pattern_11": {
+    "solo": 0.445,
+    "tie_in": 1.0,
+    "top3": 0.445,
+    "mean_tie_size": 10.435
+   },
+   "share30_cnn_11": {
+    "solo": 0.42,
+    "tie_in": 0.885,
+    "top3": 0.43,
+    "mean_tie_size": 8.92
+   },
+   "share70_true_pattern_11": {
+    "solo": 1.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 1.0
+   },
+   "share70_cnn_11": {
+    "solo": 0.96,
+    "tie_in": 0.96,
+    "top3": 0.975,
+    "mean_tie_size": 1.0
+   }
+  },
+  "n21a_gate_focus": {
+   "name": "gate 포토 가장자리 초점",
+   "pattern": "edge-ring",
+   "evidence": "일부",
+   "fail_evidence": "원리",
+   "pred_unique11": false,
+   "pred_unique4": false,
+   "true_pattern_11": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 2.0
+   },
+   "true_pattern_4": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 0.995,
+    "mean_tie_size": 3.03
+   },
+   "cnn_11": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 2.0
+   },
+   "cnn_4": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 0.995,
+    "mean_tie_size": 3.03
+   },
+   "cnn_pattern_acc": 0.995,
+   "share30_true_pattern_11": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 0.985,
+    "mean_tie_size": 2.105
+   },
+   "share30_cnn_11": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 0.985,
+    "mean_tie_size": 2.105
+   },
+   "share70_true_pattern_11": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 2.0
+   },
+   "share70_cnn_11": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 2.0
+   }
+  },
+  "n21b_develop_residue": {
+   "name": "gate 포토 현상 찌꺼기",
+   "pattern": "donut",
+   "evidence": "원문",
+   "fail_evidence": "원리",
+   "pred_unique11": true,
+   "pred_unique4": true,
+   "true_pattern_11": {
+    "solo": 1.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 1.0
+   },
+   "true_pattern_4": {
+    "solo": 1.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 1.0
+   },
+   "cnn_11": {
+    "solo": 0.995,
+    "tie_in": 0.995,
+    "top3": 1.0,
+    "mean_tie_size": 1.0
+   },
+   "cnn_4": {
+    "solo": 0.905,
+    "tie_in": 0.905,
+    "top3": 0.92,
+    "mean_tie_size": 1.085
+   },
+   "cnn_pattern_acc": 0.86,
+   "share30_true_pattern_11": {
+    "solo": 1.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 1.0
+   },
+   "share30_cnn_11": {
+    "solo": 0.925,
+    "tie_in": 0.925,
+    "top3": 0.945,
+    "mean_tie_size": 1.005
+   },
+   "share70_true_pattern_11": {
+    "solo": 1.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 1.0
+   },
+   "share70_cnn_11": {
+    "solo": 1.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 1.0
+   }
+  },
+  "n22_poly_overetch": {
+   "name": "poly 식각 가장자리 과식각",
+   "pattern": "edge-ring",
+   "evidence": "강의",
+   "fail_evidence": "원리",
+   "pred_unique11": true,
+   "pred_unique4": false,
+   "true_pattern_11": {
+    "solo": 1.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 1.0
+   },
+   "true_pattern_4": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 0.235,
+    "mean_tie_size": 4.0
+   },
+   "cnn_11": {
+    "solo": 1.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 1.0
+   },
+   "cnn_4": {
+    "solo": 0.0,
+    "tie_in": 0.975,
+    "top3": 0.225,
+    "mean_tie_size": 3.93
+   },
+   "cnn_pattern_acc": 0.98,
+   "share30_true_pattern_11": {
+    "solo": 0.97,
+    "tie_in": 1.0,
+    "top3": 0.97,
+    "mean_tie_size": 1.24
+   },
+   "share30_cnn_11": {
+    "solo": 0.97,
+    "tie_in": 0.995,
+    "top3": 0.97,
+    "mean_tie_size": 1.205
+   },
+   "share70_true_pattern_11": {
+    "solo": 1.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 1.0
+   },
+   "share70_cnn_11": {
+    "solo": 1.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 1.0
+   }
+  },
+  "n23_gate_ash_charge": {
+   "name": "gate 뒤 ashing 대전",
+   "pattern": "center",
+   "evidence": "옮김",
+   "fail_evidence": "✅",
+   "pred_unique11": false,
+   "pred_unique4": false,
+   "true_pattern_11": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 2.0
+   },
+   "true_pattern_4": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 2.0
+   },
+   "cnn_11": {
+    "solo": 0.0,
+    "tie_in": 0.995,
+    "top3": 1.0,
+    "mean_tie_size": 1.995
+   },
+   "cnn_4": {
+    "solo": 0.0,
+    "tie_in": 0.955,
+    "top3": 0.97,
+    "mean_tie_size": 1.995
+   },
+   "cnn_pattern_acc": 0.91,
+   "share30_true_pattern_11": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 2.0
+   },
+   "share30_cnn_11": {
+    "solo": 0.0,
+    "tie_in": 0.995,
+    "top3": 1.0,
+    "mean_tie_size": 1.995
+   },
+   "share70_true_pattern_11": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 2.0
+   },
+   "share70_cnn_11": {
+    "solo": 0.0,
+    "tie_in": 0.995,
+    "top3": 1.0,
+    "mean_tie_size": 1.995
+   }
+  },
+  "n24_sd_dose": {
+   "name": "S/D 주입 도즈 이탈",
+   "pattern": "near-full",
+   "evidence": "원문",
+   "fail_evidence": "✅",
+   "pred_unique11": true,
+   "pred_unique4": false,
+   "true_pattern_11": {
+    "solo": 1.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 1.0
+   },
+   "true_pattern_4": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 2.0
+   },
+   "cnn_11": {
+    "solo": 0.945,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 1.055
+   },
+   "cnn_4": {
+    "solo": 0.0,
+    "tie_in": 0.965,
+    "top3": 0.995,
+    "mean_tie_size": 2.025
+   },
+   "cnn_pattern_acc": 0.945,
+   "share30_true_pattern_11": {
+    "solo": 1.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 1.0
+   },
+   "share30_cnn_11": {
+    "solo": 0.945,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 1.055
+   },
+   "share70_true_pattern_11": {
+    "solo": 1.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 1.0
+   },
+   "share70_cnn_11": {
+    "solo": 0.945,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 1.055
+   }
+  },
+  "n25_spacer_thin": {
+   "name": "spacer 얇음 (salicide 다리)",
+   "pattern": "near-full",
+   "evidence": "원리",
+   "fail_evidence": "원리",
+   "pred_unique11": true,
+   "pred_unique4": true,
+   "true_pattern_11": {
+    "solo": 1.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 1.0
+   },
+   "true_pattern_4": {
+    "solo": 1.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 1.0
+   },
+   "cnn_11": {
+    "solo": 0.985,
+    "tie_in": 0.985,
+    "top3": 1.0,
+    "mean_tie_size": 1.015
+   },
+   "cnn_4": {
+    "solo": 0.755,
+    "tie_in": 0.755,
+    "top3": 0.92,
+    "mean_tie_size": 1.0
+   },
+   "cnn_pattern_acc": 0.92,
+   "share30_true_pattern_11": {
+    "solo": 0.995,
+    "tie_in": 0.995,
+    "top3": 1.0,
+    "mean_tie_size": 1.0
+   },
+   "share30_cnn_11": {
+    "solo": 0.895,
+    "tie_in": 0.895,
+    "top3": 0.92,
+    "mean_tie_size": 1.03
+   },
+   "share70_true_pattern_11": {
+    "solo": 1.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 1.0
+   },
+   "share70_cnn_11": {
+    "solo": 1.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 1.0
+   }
+  },
+  "n26_rta_edge": {
+   "name": "활성화 RTA 가장자리 온도",
+   "pattern": "edge-ring",
+   "evidence": "원문",
+   "fail_evidence": "✅",
+   "pred_unique11": true,
+   "pred_unique4": false,
+   "true_pattern_11": {
+    "solo": 1.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 1.0
+   },
+   "true_pattern_4": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 0.995,
+    "mean_tie_size": 3.03
+   },
+   "cnn_11": {
+    "solo": 1.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 1.0
+   },
+   "cnn_4": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 0.995,
+    "mean_tie_size": 3.03
+   },
+   "cnn_pattern_acc": 0.985,
+   "share30_true_pattern_11": {
+    "solo": 0.97,
+    "tie_in": 1.0,
+    "top3": 0.975,
+    "mean_tie_size": 1.205
+   },
+   "share30_cnn_11": {
+    "solo": 0.97,
+    "tie_in": 1.0,
+    "top3": 0.975,
+    "mean_tie_size": 1.205
+   },
+   "share70_true_pattern_11": {
+    "solo": 1.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 1.0
+   },
+   "share70_cnn_11": {
+    "solo": 1.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 1.0
+   }
+  },
+  "n27_salicide_temp": {
+   "name": "salicide 열처리 온도 이탈",
+   "pattern": "near-full",
+   "evidence": "일부",
+   "fail_evidence": "✅",
+   "pred_unique11": true,
+   "pred_unique4": false,
+   "true_pattern_11": {
+    "solo": 1.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 1.0
+   },
+   "true_pattern_4": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 2.0
+   },
+   "cnn_11": {
+    "solo": 1.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 1.0
+   },
+   "cnn_4": {
+    "solo": 0.0,
+    "tie_in": 0.96,
+    "top3": 1.0,
+    "mean_tie_size": 2.005
+   },
+   "cnn_pattern_acc": 0.945,
+   "share30_true_pattern_11": {
+    "solo": 1.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 1.0
+   },
+   "share30_cnn_11": {
+    "solo": 1.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 1.0
+   },
+   "share70_true_pattern_11": {
+    "solo": 1.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 1.0
+   },
+   "share70_cnn_11": {
+    "solo": 1.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 1.0
+   }
+  },
+  "n28_ild_particle": {
+   "name": "ILD 챔버 입자",
+   "pattern": "loc",
+   "evidence": "원문",
+   "fail_evidence": "✅",
+   "pred_unique11": true,
+   "pred_unique4": true,
+   "true_pattern_11": {
+    "solo": 0.935,
+    "tie_in": 1.0,
+    "top3": 0.935,
+    "mean_tie_size": 1.195
+   },
+   "true_pattern_4": {
+    "solo": 0.745,
+    "tie_in": 0.96,
+    "top3": 0.785,
+    "mean_tie_size": 1.685
+   },
+   "cnn_11": {
+    "solo": 0.735,
+    "tie_in": 0.765,
+    "top3": 0.875,
+    "mean_tie_size": 1.29
+   },
+   "cnn_4": {
+    "solo": 0.605,
+    "tie_in": 0.72,
+    "top3": 0.72,
+    "mean_tie_size": 1.575
+   },
+   "cnn_pattern_acc": 0.69,
+   "share30_true_pattern_11": {
+    "solo": 0.59,
+    "tie_in": 0.995,
+    "top3": 0.595,
+    "mean_tie_size": 2.215
+   },
+   "share30_cnn_11": {
+    "solo": 0.47,
+    "tie_in": 0.7,
+    "top3": 0.55,
+    "mean_tie_size": 1.925
+   },
+   "share70_true_pattern_11": {
+    "solo": 0.975,
+    "tie_in": 1.0,
+    "top3": 0.975,
+    "mean_tie_size": 1.075
+   },
+   "share70_cnn_11": {
+    "solo": 0.76,
+    "tie_in": 0.77,
+    "top3": 0.905,
+    "mean_tie_size": 1.235
+   }
+  },
+  "n29_ild_cmp_edge": {
+   "name": "ILD CMP 가장자리 두께",
+   "pattern": "edge-ring",
+   "evidence": "원문",
+   "fail_evidence": "✅",
+   "pred_unique11": false,
+   "pred_unique4": false,
+   "true_pattern_11": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 2.0
+   },
+   "true_pattern_4": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 0.985,
+    "mean_tie_size": 2.105
+   },
+   "cnn_11": {
+    "solo": 0.0,
+    "tie_in": 0.98,
+    "top3": 0.995,
+    "mean_tie_size": 1.98
+   },
+   "cnn_4": {
+    "solo": 0.0,
+    "tie_in": 0.98,
+    "top3": 0.98,
+    "mean_tie_size": 2.085
+   },
+   "cnn_pattern_acc": 0.98,
+   "share30_true_pattern_11": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 0.99,
+    "mean_tie_size": 2.07
+   },
+   "share30_cnn_11": {
+    "solo": 0.0,
+    "tie_in": 0.975,
+    "top3": 0.985,
+    "mean_tie_size": 2.05
+   },
+   "share70_true_pattern_11": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 2.0
+   },
+   "share70_cnn_11": {
+    "solo": 0.0,
+    "tie_in": 0.98,
+    "top3": 0.995,
+    "mean_tie_size": 1.98
+   }
+  },
+  "n30_contact_barc": {
+   "name": "contact 반사방지막 두꺼움",
+   "pattern": "edge-loc",
+   "evidence": "원문",
+   "fail_evidence": "✅",
+   "pred_unique11": true,
+   "pred_unique4": true,
+   "true_pattern_11": {
+    "solo": 1.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 1.0
+   },
+   "true_pattern_4": {
+    "solo": 0.96,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 1.04
+   },
+   "cnn_11": {
+    "solo": 0.99,
+    "tie_in": 0.99,
+    "top3": 0.995,
+    "mean_tie_size": 1.01
+   },
+   "cnn_4": {
+    "solo": 0.945,
+    "tie_in": 0.985,
+    "top3": 0.99,
+    "mean_tie_size": 1.05
+   },
+   "cnn_pattern_acc": 0.77,
+   "share30_true_pattern_11": {
+    "solo": 0.96,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 1.04
+   },
+   "share30_cnn_11": {
+    "solo": 0.895,
+    "tie_in": 0.93,
+    "top3": 0.965,
+    "mean_tie_size": 1.075
+   },
+   "share70_true_pattern_11": {
+    "solo": 1.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 1.0
+   },
+   "share70_cnn_11": {
+    "solo": 0.99,
+    "tie_in": 0.99,
+    "top3": 0.995,
+    "mean_tie_size": 1.01
+   }
+  },
+  "n31_contact_edge_ring": {
+   "name": "contact 식각 edge ring",
+   "pattern": "edge-ring",
+   "evidence": "원문",
+   "fail_evidence": "✅",
+   "pred_unique11": false,
+   "pred_unique4": false,
+   "true_pattern_11": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 2.0
+   },
+   "true_pattern_4": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 0.995,
+    "mean_tie_size": 2.035
+   },
+   "cnn_11": {
+    "solo": 0.0,
+    "tie_in": 0.945,
+    "top3": 0.97,
+    "mean_tie_size": 1.945
+   },
+   "cnn_4": {
+    "solo": 0.0,
+    "tie_in": 0.945,
+    "top3": 0.965,
+    "mean_tie_size": 1.98
+   },
+   "cnn_pattern_acc": 0.96,
+   "share30_true_pattern_11": {
+    "solo": 0.0,
+    "tie_in": 0.99,
+    "top3": 0.955,
+    "mean_tie_size": 2.31
+   },
+   "share30_cnn_11": {
+    "solo": 0.0,
+    "tie_in": 0.935,
+    "top3": 0.925,
+    "mean_tie_size": 2.225
+   },
+   "share70_true_pattern_11": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 2.0
+   },
+   "share70_cnn_11": {
+    "solo": 0.0,
+    "tie_in": 0.945,
+    "top3": 0.97,
+    "mean_tie_size": 1.945
+   }
+  },
+  "n33_tin_thin": {
+   "name": "TiN 장벽 얇음",
+   "pattern": "near-full",
+   "evidence": "원리",
+   "fail_evidence": "원리",
+   "pred_unique11": false,
+   "pred_unique4": false,
+   "true_pattern_11": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 0.0,
+    "mean_tie_size": 4.0
+   },
+   "true_pattern_4": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 0.0,
+    "mean_tie_size": 6.0
+   },
+   "cnn_11": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 0.0,
+    "mean_tie_size": 4.05
+   },
+   "cnn_4": {
+    "solo": 0.0,
+    "tie_in": 0.95,
+    "top3": 0.0,
+    "mean_tie_size": 5.8
+   },
+   "cnn_pattern_acc": 0.95,
+   "share30_true_pattern_11": {
+    "solo": 0.0,
+    "tie_in": 0.99,
+    "top3": 0.0,
+    "mean_tie_size": 3.97
+   },
+   "share30_cnn_11": {
+    "solo": 0.0,
+    "tie_in": 0.99,
+    "top3": 0.0,
+    "mean_tie_size": 4.02
+   },
+   "share70_true_pattern_11": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 0.0,
+    "mean_tie_size": 4.0
+   },
+   "share70_cnn_11": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 0.0,
+    "mean_tie_size": 4.05
+   }
+  },
+  "n34_w_cmp_edge": {
+   "name": "W CMP 가장자리 덜 연마",
+   "pattern": "edge-ring",
+   "evidence": "옮김",
+   "fail_evidence": "원리",
+   "pred_unique11": true,
+   "pred_unique4": false,
+   "true_pattern_11": {
+    "solo": 1.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 1.0
+   },
+   "true_pattern_4": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 0.71,
+    "mean_tie_size": 4.0
+   },
+   "cnn_11": {
+    "solo": 1.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 1.0
+   },
+   "cnn_4": {
+    "solo": 0.0,
+    "tie_in": 0.94,
+    "top3": 0.65,
+    "mean_tie_size": 3.825
+   },
+   "cnn_pattern_acc": 0.955,
+   "share30_true_pattern_11": {
+    "solo": 0.97,
+    "tie_in": 1.0,
+    "top3": 0.97,
+    "mean_tie_size": 1.24
+   },
+   "share30_cnn_11": {
+    "solo": 0.93,
+    "tie_in": 0.96,
+    "top3": 0.96,
+    "mean_tie_size": 1.24
+   },
+   "share70_true_pattern_11": {
+    "solo": 1.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 1.0
+   },
+   "share70_cnn_11": {
+    "solo": 1.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 1.0
+   }
+  },
+  "n35_metal_underetch": {
+   "name": "metal 1 식각 부족",
+   "pattern": "near-full",
+   "evidence": "원리",
+   "fail_evidence": "원리",
+   "pred_unique11": true,
+   "pred_unique4": false,
+   "true_pattern_11": {
+    "solo": 1.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 1.0
+   },
+   "true_pattern_4": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 0.63,
+    "mean_tie_size": 6.0
+   },
+   "cnn_11": {
+    "solo": 0.95,
+    "tie_in": 0.95,
+    "top3": 1.0,
+    "mean_tie_size": 1.0
+   },
+   "cnn_4": {
+    "solo": 0.0,
+    "tie_in": 0.95,
+    "top3": 0.61,
+    "mean_tie_size": 5.8
+   },
+   "cnn_pattern_acc": 0.95,
+   "share30_true_pattern_11": {
+    "solo": 1.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 1.0
+   },
+   "share30_cnn_11": {
+    "solo": 0.92,
+    "tie_in": 0.92,
+    "top3": 0.95,
+    "mean_tie_size": 1.0
+   },
+   "share70_true_pattern_11": {
+    "solo": 1.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 1.0
+   },
+   "share70_cnn_11": {
+    "solo": 0.95,
+    "tie_in": 0.95,
+    "top3": 1.0,
+    "mean_tie_size": 1.0
+   }
+  },
+  "n35_metal_ash_charge": {
+   "name": "metal 1 뒤 ashing 대전",
+   "pattern": "center",
+   "evidence": "원문",
+   "fail_evidence": "✅",
+   "pred_unique11": false,
+   "pred_unique4": false,
+   "true_pattern_11": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 2.0
+   },
+   "true_pattern_4": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 2.0
+   },
+   "cnn_11": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 2.0
+   },
+   "cnn_4": {
+    "solo": 0.0,
+    "tie_in": 0.97,
+    "top3": 0.985,
+    "mean_tie_size": 1.975
+   },
+   "cnn_pattern_acc": 0.915,
+   "share30_true_pattern_11": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 2.0
+   },
+   "share30_cnn_11": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 2.0
+   },
+   "share70_true_pattern_11": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 2.0
+   },
+   "share70_cnn_11": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 2.0
+   }
+  },
+  "n36_pad_open": {
+   "name": "pad 덜 열림",
+   "pattern": "near-full",
+   "evidence": "원리",
+   "fail_evidence": "원리",
+   "pred_unique11": false,
+   "pred_unique4": false,
+   "true_pattern_11": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 2.0
+   },
+   "true_pattern_4": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 2.0
+   },
+   "cnn_11": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 2.15
+   },
+   "cnn_4": {
+    "solo": 0.0,
+    "tie_in": 0.96,
+    "top3": 0.995,
+    "mean_tie_size": 1.99
+   },
+   "cnn_pattern_acc": 0.95,
+   "share30_true_pattern_11": {
+    "solo": 0.0,
+    "tie_in": 0.99,
+    "top3": 1.0,
+    "mean_tie_size": 1.99
+   },
+   "share30_cnn_11": {
+    "solo": 0.0,
+    "tie_in": 0.915,
+    "top3": 0.95,
+    "mean_tie_size": 1.915
+   },
+   "share70_true_pattern_11": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 2.0
+   },
+   "share70_cnn_11": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 2.15
+   }
+  },
+  "n37_forming_gas_skip": {
+   "name": "forming gas 생략",
+   "pattern": "near-full",
+   "evidence": "옮김",
+   "fail_evidence": "원리",
+   "pred_unique11": true,
+   "pred_unique4": false,
+   "true_pattern_11": {
+    "solo": 1.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 1.0
+   },
+   "true_pattern_4": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 2.015
+   },
+   "cnn_11": {
+    "solo": 1.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 1.0
+   },
+   "cnn_4": {
+    "solo": 0.0,
+    "tie_in": 0.975,
+    "top3": 1.0,
+    "mean_tie_size": 1.99
+   },
+   "cnn_pattern_acc": 0.975,
+   "share30_true_pattern_11": {
+    "solo": 1.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 1.0
+   },
+   "share30_cnn_11": {
+    "solo": 1.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 1.0
+   },
+   "share70_true_pattern_11": {
+    "solo": 1.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 1.0
+   },
+   "share70_cnn_11": {
+    "solo": 1.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 1.0
+   }
+  },
+  "n38_probe": {
+   "name": "검사 바늘 접촉",
+   "pattern": "near-full",
+   "evidence": "일부",
+   "fail_evidence": "✅",
+   "pred_unique11": false,
+   "pred_unique4": false,
+   "true_pattern_11": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 2.0
+   },
+   "true_pattern_4": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 2.0
+   },
+   "cnn_11": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 2.195
+   },
+   "cnn_4": {
+    "solo": 0.0,
+    "tie_in": 0.98,
+    "top3": 1.0,
+    "mean_tie_size": 2.12
+   },
+   "cnn_pattern_acc": 0.935,
+   "share30_true_pattern_11": {
+    "solo": 0.0,
+    "tie_in": 0.995,
+    "top3": 1.0,
+    "mean_tie_size": 1.995
+   },
+   "share30_cnn_11": {
+    "solo": 0.0,
+    "tie_in": 0.9,
+    "top3": 0.935,
+    "mean_tie_size": 1.905
+   },
+   "share70_true_pattern_11": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 2.0
+   },
+   "share70_cnn_11": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 2.195
+   }
+  },
+  "c_cmp_scratch": {
+   "name": "CMP 긁힘",
+   "pattern": "scratch",
+   "evidence": "원문",
+   "fail_evidence": "✅",
+   "pred_unique11": false,
+   "pred_unique4": false,
+   "true_pattern_11": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 2.0
+   },
+   "true_pattern_4": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 2.0
+   },
+   "cnn_11": {
+    "solo": 0.0,
+    "tie_in": 0.96,
+    "top3": 1.0,
+    "mean_tie_size": 1.96
+   },
+   "cnn_4": {
+    "solo": 0.0,
+    "tie_in": 0.905,
+    "top3": 0.96,
+    "mean_tie_size": 1.935
+   },
+   "cnn_pattern_acc": 0.76,
+   "share30_true_pattern_11": {
+    "solo": 0.0,
+    "tie_in": 0.995,
+    "top3": 1.0,
+    "mean_tie_size": 1.995
+   },
+   "share30_cnn_11": {
+    "solo": 0.0,
+    "tie_in": 0.9,
+    "top3": 0.955,
+    "mean_tie_size": 1.97
+   },
+   "share70_true_pattern_11": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 2.0
+   },
+   "share70_cnn_11": {
+    "solo": 0.0,
+    "tie_in": 0.945,
+    "top3": 1.0,
+    "mean_tie_size": 1.95
+   }
+  },
+  "c_robot_scratch": {
+   "name": "이송 로봇 긁힘",
+   "pattern": "scratch",
+   "evidence": "원문",
+   "fail_evidence": "원리",
+   "pred_unique11": false,
+   "pred_unique4": false,
+   "true_pattern_11": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 2.0
+   },
+   "true_pattern_4": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 2.0
+   },
+   "cnn_11": {
+    "solo": 0.0,
+    "tie_in": 0.89,
+    "top3": 0.98,
+    "mean_tie_size": 1.91
+   },
+   "cnn_4": {
+    "solo": 0.0,
+    "tie_in": 0.84,
+    "top3": 0.905,
+    "mean_tie_size": 1.94
+   },
+   "cnn_pattern_acc": 0.665,
+   "share30_true_pattern_11": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 2.0
+   },
+   "share30_cnn_11": {
+    "solo": 0.0,
+    "tie_in": 0.85,
+    "top3": 0.9,
+    "mean_tie_size": 1.95
+   },
+   "share70_true_pattern_11": {
+    "solo": 0.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 2.0
+   },
+   "share70_cnn_11": {
+    "solo": 0.0,
+    "tie_in": 0.915,
+    "top3": 0.99,
+    "mean_tie_size": 1.915
+   }
+  },
+  "c_cleanroom": {
+   "name": "클린룸 입자",
+   "pattern": "random",
+   "evidence": "원문",
+   "fail_evidence": "✅",
+   "pred_unique11": true,
+   "pred_unique4": true,
+   "true_pattern_11": {
+    "solo": 1.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 1.0
+   },
+   "true_pattern_4": {
+    "solo": 1.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 1.0
+   },
+   "cnn_11": {
+    "solo": 0.98,
+    "tie_in": 0.98,
+    "top3": 0.99,
+    "mean_tie_size": 1.0
+   },
+   "cnn_4": {
+    "solo": 0.975,
+    "tie_in": 0.975,
+    "top3": 0.985,
+    "mean_tie_size": 1.005
+   },
+   "cnn_pattern_acc": 0.92,
+   "share30_true_pattern_11": {
+    "solo": 1.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 1.0
+   },
+   "share30_cnn_11": {
+    "solo": 0.98,
+    "tie_in": 0.98,
+    "top3": 0.99,
+    "mean_tie_size": 1.01
+   },
+   "share70_true_pattern_11": {
+    "solo": 1.0,
+    "tie_in": 1.0,
+    "top3": 1.0,
+    "mean_tie_size": 1.0
+   },
+   "share70_cnn_11": {
+    "solo": 0.98,
+    "tie_in": 0.98,
+    "top3": 0.99,
+    "mean_tie_size": 1.0
+   }
+  }
+ },
+ "summary": {
+  "true_pattern_11": {
+   "identified_ge90": 21,
+   "identified_ge50": 21,
+   "mean_solo": 0.5337179487179488,
+   "mean_tie_in": 1.0,
+   "mean_top3": 0.9726923076923077
+  },
+  "true_pattern_4": {
+   "identified_ge90": 7,
+   "identified_ge50": 8,
+   "mean_solo": 0.1967948717948718,
+   "mean_tie_in": 0.9523076923076923,
+   "mean_top3": 0.8653846153846154
+  },
+  "cnn_11": {
+   "identified_ge90": 20,
+   "identified_ge50": 21,
+   "mean_solo": 0.521025641025641,
+   "mean_tie_in": 0.9765384615384614,
+   "mean_top3": 0.9617948717948719
+  },
+  "cnn_4": {
+   "identified_ge90": 5,
+   "identified_ge50": 8,
+   "mean_solo": 0.18064102564102563,
+   "mean_tie_in": 0.888846153846154,
+   "mean_top3": 0.8330769230769232
+  },
+  "share30_true_pattern_11": {
+   "identified_ge90": 17,
+   "identified_ge50": 20,
+   "mean_solo": 0.4867948717948718,
+   "mean_tie_in": 0.9593589743589741,
+   "mean_top3": 0.9451282051282052
+  },
+  "share30_cnn_11": {
+   "identified_ge90": 15,
+   "identified_ge50": 19,
+   "mean_solo": 0.46564102564102566,
+   "mean_tie_in": 0.9073076923076923,
+   "mean_top3": 0.9147435897435897
+  },
+  "share70_true_pattern_11": {
+   "identified_ge90": 21,
+   "identified_ge50": 21,
+   "mean_solo": 0.5367948717948717,
+   "mean_tie_in": 1.0,
+   "mean_top3": 0.9737179487179487
+  },
+  "share70_cnn_11": {
+   "identified_ge90": 20,
+   "identified_ge50": 21,
+   "mean_solo": 0.5246153846153846,
+   "mean_tie_in": 0.9793589743589743,
+   "mean_top3": 0.9639743589743589
+  },
+  "prediction_agreement_11": "39/39",
+  "cnn_pattern_acc_by_pattern": {
+   "edge-loc": 0.785,
+   "near-full": 0.9488888888888888,
+   "edge-ring": 0.9694444444444444,
+   "loc": 0.71375,
+   "donut": 0.86,
+   "center": 0.9125000000000001,
+   "scratch": 0.7125,
+   "random": 0.92
+  }
+ }
+}

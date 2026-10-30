@@ -25,7 +25,8 @@ def test_moscap_cards_have_engine_and_answer_parts():
 
 
 def test_nmos_scenarios_match_engine():
-    """NMOS 시연 — 카드가 원인 40개 전부이고, 넣은 사고가 엔진의 1순위(공동 포함) 안에 있다."""
+    """NMOS 시연 — 카드가 원인 전부(2026-10-30부터 39개)이고, 넣은 사고가 엔진의 1순위(공동 포함) 안에 있다.
+    사고를 둘 넣은 웨이퍼(N13)는 둘 중 하나가 1순위이고 둘 다 2순위 안이면 된다."""
     from src.inference import rootcause_kb_nmos as nk
     d = json.load(open("data/demo/nmos_scenarios.json", encoding="utf-8"))
     assert set(d["card"]) == set(nk.CAUSE_IDS)
@@ -35,7 +36,10 @@ def test_nmos_scenarios_match_engine():
     for s in d["scenarios"]:
         assert all(set(r["steps"]) <= flow for r in s["ranking"])
         top = {r["cause_id"] for r in s["ranking"] if r["tied"]} or {s["ranking"][0]["cause_id"]}
-        assert s["set_cause"] in top
+        truth = set(s.get("truth", [s["set_cause"]]))
+        assert top & truth
+        if len(truth) > 1:
+            assert truth <= {r["cause_id"] for r in s["ranking"][:2]}
 
 
 def test_nmos_magnitude_scenarios():

@@ -2,8 +2,8 @@
 NMOS 시연 시나리오 → data/demo/nmos_scenarios.json (대시보드 섹션 16 「NMOS 41단계」 — 38단계 + SAB 3단계)
 
 맵은 실제 WM-811K(A-1b lot 단위 분할의 test lot — 패턴 CNN이 한 번도 안 본 맵)이고, 측정 결과(11칸)는 NMOS 지식표
-(src/inference/rootcause_kb_nmos.py)의 원인에서 합성한다 — N-1 합성 시험과 같은 방식(주 측정 비율 = 지식표 기댓값,
-칩의 10%는 아무 칸 — 잡음). CNN은 맵을 실제로 판정하고, 엔진은 NMOS 지식표로 순위를 매긴다. 같은 측정을 기존 4칸으로
+(src/inference/rootcause_kb_nmos.py)의 원인에서 합성한다 — N-1 합성 시험과 같은 방식(*2026-10-30* 주 측정 50% ·
+나머지 50%는 다른 칸에 고르게. 예전의 「칩 10%를 아무 칸으로 다시 섞기」는 나머지 50%가 그 역할을 해서 뺐다). CNN은 맵을 실제로 판정하고, 엔진은 NMOS 지식표로 순위를 매긴다. 같은 측정을 기존 4칸으로
 묶었을 때의 공동 1순위 수도 같이 담는다(「측정을 늘려야 짚인다」를 화면에서 보이려고).
 
 *(2026-10-28 보강 — 「얼마나」)* 웨이퍼마다 WAT 값(Vt · SS · on 전류 · C-V 산화막)을 NMOS 소자 식(src/inference/nmos_device.py)
@@ -34,7 +34,7 @@ from src.inference import rootcause_kb_nmos as nk                      # noqa: E
 
 OUT = "data/demo/nmos_scenarios.json"
 SEED = 2028
-EPS_BIN = 0.10
+EPS_BIN = 0.0     # 2026-10-30 — 0.10 → 0 (나머지 50% 무작위가 잡음 역할)
 
 PAT_KO = {"center": "가운데", "donut": "도넛", "edge-loc": "가장자리 일부", "edge-ring": "가장자리 링",
           "loc": "한 곳에 뭉침", "near-full": "거의 전체", "random": "흩어짐", "scratch": "선"}
@@ -78,7 +78,7 @@ TEXT = {
     "n07_trench_edge": ("trench 식각이 가장자리에서 얕아 분리가 부족했을 가능성",
                         "식각 장비 edge ring이 닳으면 가장자리만 달라져 링으로 나와요 (Chai · Brady 옮김)",
                         ["가장자리 trench 깊이", "edge ring 사용 시간"]),
-    "n08_pr_residue": ("STI 포토 뒤 PR 찌꺼기가 남아 다음 막에 결함을 만들었을 가능성",
+    "n08_pr_residue": ("STI 포토 뒤 PR 찌꺼기가 trench 자리에 남아 이웃 활성 영역이 이어졌을 가능성",
                        "찌꺼기가 남은 자리만 걸려 한 곳에 뭉쳐요",
                        ["공정 중 결함 검사 맵을 단계별로 겹쳐 보기", "ashing 기록"]),
     "n09_liner_skip": ("liner 산화가 빠지거나 얇아 trench 모서리가 날카로웠을 가능성", None,
@@ -89,7 +89,7 @@ TEXT = {
     "n11_densify_skip": ("치밀화 열처리가 빠져 채운 막이 HF에 많이 깎였을 가능성", None,
                          ["채운 막 식각 속도", "STI 모서리 단면"]),
     "n12_sti_cmp_edge": ("STI CMP가 가장자리를 너무 깎아 모서리 누설이 생겼을 가능성",
-                         "CMP는 가장자리 압력 · 속도가 달라 링으로 나와요 (Goh · Chen 옮김)",
+                         "CMP는 가장자리 압력 · 속도가 달라 링으로 나와요 (Chen 2001 옮김)",
                          ["가장자리 STI 높이", "CMP 가장자리 압력 기록"]),
     "n13_nit_residue": ("질화막이 덜 벗겨져 그 자리 gate 산화가 이상했을 가능성",
                         "덜 벗겨진 자리만 걸려 한 곳에 뭉쳐요", ["질화막 제거 뒤 표면 검사", "인산 식각 시간"]),
@@ -100,9 +100,6 @@ TEXT = {
     "n16_vt_dose": ("Vt 주입 도즈가 어긋났을 가능성", None, ["이온 주입기 도즈 기록", "모니터 웨이퍼 면저항"]),
     "n17_screen_residue": ("screen oxide가 덜 벗겨져 gate 산화막이 두꺼워졌을 가능성", None,
                            ["gate 산화막 두께 (공정 중 측정)", "screen oxide 제거 시간 기록"]),
-    "n18_rinse_charge": ("gate 앞 세정의 물 헹굼 정전기로 gate 산화막이 약해졌을 가능성",
-                         "회전 헹굼에서 가운데에 전하가 몰려 가운데 칩이 걸려요 (Lin 2012)",
-                         ["헹굼물 저항 · CO₂ 주입 기록"]),
     "n19_gox_thick": ("gate 산화 시간 · 온도가 어긋나 두께가 변했을 가능성", None,
                       ["gate 산화막 두께 (공정 중 측정)", "산화로 온도 기록"]),
     "n20_poly_doping": ("poly 도핑이 부족해 gate가 공핍됐을 가능성", None, ["poly 면저항 모니터", "poly 도핑 기록"]),
@@ -138,14 +135,14 @@ TEXT = {
     "n31_contact_edge_ring": ("contact 식각 장비 edge ring이 새것이라 가장자리가 덜 뚫렸을 가능성",
                               "edge ring 높이가 가장자리 plasma를 바꿔 링으로 나와요 (Chai · Brady)",
                               ["edge ring 사용 시간 (RF 시간)"]),
-    "n32_contact_ash_charge": ("contact 뒤 ashing에서 금속이 안테나가 되어 대전 손상을 입었을 가능성",
-                               "plasma 전하가 가운데에 몰려 가운데 칩이 걸려요 (Chen 2000)",
-                               ["contact 뒤 ashing 장비 균일도", "안테나 크기별 누설"]),
     "n33_tin_thin": ("TiN 장벽이 얇아 W 증착 때 접합이 손상됐을 가능성", None, ["TiN 두께 기록", "STI 모서리 단면"]),
     "n34_w_cmp_edge": ("W CMP가 가장자리를 덜 깎아 W가 남았을 가능성",
                        "CMP는 가장자리 압력 · 속도가 달라 링으로 나와요 (Goh 옮김)",
                        ["가장자리 W 잔류 검사", "CMP 가장자리 압력 기록"]),
     "n35_metal_underetch": ("metal 1 식각이 덜 돼 배선이 붙었을 가능성", None, ["metal 식각 종점 기록"]),
+    "n35_metal_ash_charge": ("metal 1 뒤 ashing에서 금속이 안테나가 되어 대전 손상을 입었을 가능성",
+                             "plasma 전하가 가운데에 몰려 가운데 칩이 걸려요 (Chen 2000)",
+                             ["metal 1 뒤 ashing 장비 균일도", "안테나 크기별 누설"]),
     "n36_pad_open": ("보호막 pad가 덜 열려 측정이 안 됐을 가능성", None, ["pad 현미경 확인", "다시 재면 살아나나"]),
     "n37_forming_gas_skip": ("forming gas 열처리가 빠져 계면 결함이 남았을 가능성", None,
                              ["forming gas 로 기록"]),
@@ -168,8 +165,8 @@ KIND = {**{c: "전기 값" for c in ("n02_clean_metal", "n15_screen_skip", "n16_
                                 "n33_tin_thin", "n34_w_cmp_edge", "n35_metal_underetch", "n36_pad_open")},
         **{c: "결함 밀도" for c in ("n08_pr_residue", "n10_fill_void", "n28_ild_particle", "c_cmp_scratch",
                                     "c_robot_scratch", "c_cleanroom")},
-        **{c: "장비 변수" for c in ("n01_bevel", "n18_rinse_charge", "n21b_develop_residue", "n23_gate_ash_charge",
-                                    "n31_contact_edge_ring", "n32_contact_ash_charge", "n38_probe")}}
+        **{c: "장비 변수" for c in ("n01_bevel", "n21b_develop_residue", "n23_gate_ash_charge",
+                                    "n31_contact_edge_ring", "n35_metal_ash_charge", "n38_probe")}}
 KIND_TODO = {   # 전기 값인데 크기 식을 아직 안 붙인 것 — 왜
     "n02_clean_metal": "접합 누설 식(트랩 → 누설 전류)을 아직 안 붙였어요",
     "n15_screen_skip": "평균이 아니라 칩마다 흩어지는 사고라, 흩어짐(σ) 식이 따로 필요해요",
@@ -196,8 +193,10 @@ SHAPE_DEFAULT = {"near-full": "이 단계는 웨이퍼 전체를 한꺼번에 �
 # 측정으로 안 갈리는 묶음 — 무엇을 재면 갈리나 (PDF 2판 4절)
 SPLIT = {
     frozenset({"n29_ild_cmp_edge", "n31_contact_edge_ring"}): "가장자리 ILD 두께 vs edge ring 사용 시간(RF 시간)",
-    frozenset({"n18_rinse_charge", "n23_gate_ash_charge", "n32_contact_ash_charge"}):
-        "헹굼물 저항 · CO₂ 주입 기록 vs ashing 장비 균일도 · 안테나 크기별 누설",
+    frozenset({"n23_gate_ash_charge", "n35_metal_ash_charge"}):
+        "ashing 장비 기록(gate 뒤 vs metal 1 뒤) · 안테나 크기별 누설",
+    frozenset({"n05_active_focus", "n21a_gate_focus"}): "가장자리 활성 폭 vs gate 길이 (CD 측정)",
+    frozenset({"n08_pr_residue", "n10_fill_void"}): "공정 중 결함 검사 맵을 단계별로 — STI 포토 뒤 vs trench 채우기 뒤",
     frozenset({"n17_screen_residue", "n19_gox_thick"}): "screen oxide 제거 시간 기록 vs 산화로 온도 · 시간 기록",
     frozenset({"n36_pad_open", "n38_probe"}): "다시 재 보기(바늘이면 살아남) vs pad 현미경 확인",
 }
@@ -206,8 +205,9 @@ SPLIT = {
 SCENARIOS = [
     ("N1", "n16_vt_dose", "거의 전체 + Vt 높음",
      "웨이퍼 거의 전체 칩의 Vt가 높게 나왔어요. 「거의 전체」를 만드는 단계는 많지만, Vt만 높은 것은 Vt 주입 하나예요."),
-    ("N2", "n37_forming_gas_skip", "거의 전체 + SS 큼 · Vt 높음",
-     "N1과 같은 거의 전체인데 SS 기울기도 같이 커졌어요. 측정 하나 차이로 전혀 다른 단계를 짚어요."),
+    ("N2", "n37_forming_gas_skip", "거의 전체 + SS 큼",
+     "N1과 같은 거의 전체인데 이번엔 SS 기울기가 커졌어요. 41단계 중 SS를 움직이는 단계는 forming gas 하나라, 측정 하나 "
+     "차이로 전혀 다른 단계를 짚어요."),
     ("N3", "n20_poly_doping", "거의 전체 + poly 면저항 · Vt 높음",
      "Vt가 높고 on 전류가 크게 줄었는데, silicide를 막은 poly 저항도 커졌어요. SAB 패턴이 있어야 poly 도핑 부족이 "
      "면저항으로 보여요 — silicide가 덮인 poly로는 안 보여요."),
@@ -216,13 +216,15 @@ SCENARIOS = [
      "면저항 차이로 가장자리가 몇 °C 덜 데워졌는지까지 계산해요."),
     ("N5", "n30_contact_barc", "가장자리 일부 + 연결 끊김",
      "한쪽 가장자리 칩만 끊겼어요. 가장자리 일부 후보는 둘인데 바뀌는 측정이 달라 갈려요."),
-    ("N6", "n21b_develop_residue", "도넛 + 배선 누설 · 끊김",
-     "고리 반경의 칩들이 배선 누설과 끊김으로 떨어졌어요. 도넛을 만드는 단계는 gate 포토 현상 하나예요."),
+    ("N6", "n21b_develop_residue", "도넛 + 배선 누설",
+     "고리 반경의 칩들이 배선 누설로 떨어졌어요. 도넛을 만드는 단계는 gate 포토 현상 하나예요 — 찌꺼기가 식각을 막아 "
+     "막이 남는 쪽이라 끊김이 아니라 붙음이에요."),
     ("N7", "n29_ild_cmp_edge", "가장자리 링 + 연결 끊김 — 안 갈리는 짝",
      "가장자리 칩이 끊겼어요. ILD CMP와 contact 식각은 모양도 측정도 같아서, 엔진은 둘을 같이 올리고 무엇을 재면 "
      "갈리는지 말해요."),
-    ("N8", "n18_rinse_charge", "가운데 + gate 누설 — 셋이 묶임",
-     "가운데 칩의 gate가 샜어요. 세정 헹굼 · gate 뒤 ashing · contact 뒤 ashing 셋이 같은 모양 · 같은 측정이에요."),
+    ("N8", "n23_gate_ash_charge", "가운데 + gate 누설 — 둘이 묶임",
+     "가운데 칩의 gate가 샜어요. gate 뒤 ashing과 metal 1 뒤 ashing 둘이 같은 모양 · 같은 측정이에요(Chen 2000). "
+     "세정 헹굼은 원문과 맞지 않아 뺐어요 — 맨 실리콘 위 세정은 전하가 안 쌓여요(Lin 2012)."),
     ("N10", "n24_sd_dose", "거의 전체 + S/D 면저항 — 도즈",
      "웨이퍼 전체의 S/D 면저항이 커졌어요. 같은 면저항이라도 N4처럼 가장자리 링이면 RTA, 거의 전체면 S/D 주입 도즈예요 — "
      "측정이 같으면 맵 모양이 가려요."),
@@ -273,7 +275,8 @@ def card(c):
             "what": f"{step_txt} — {c.knob}",
             "shape": f"{PAT_KO[c.pattern]} — {shape or SHAPE_DEFAULT[c.pattern]}",
             "test": f"{labels} 쪽으로 쏠려요 — " + " · ".join(BIN_PLAIN_TEST[b] for b in c.primary),
-            "source": f"근거 수준 「{c.evidence}」 · {c.source}", "evidence": c.evidence,
+            "source": f"근거 수준 「{c.evidence}」 · {c.source} · fail 근거 {' — '.join(nk.fail_evidence(c.id))}",
+            "evidence": c.evidence, "fail_evidence": nk.fail_evidence(c.id)[0],
             "kind": KIND[c.id], "kind_note": kind_note(c, checks)}
 
 
