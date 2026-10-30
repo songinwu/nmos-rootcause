@@ -753,14 +753,16 @@ def render_demo16():
                 unsafe_allow_html=True)
     _banner(v)
     # 이전 · 다음은 단계 표시줄과 한 줄에 둔다 — ③은 화면이 길어 아래에 두면 발표 중에 스크롤해야 한다
-    b1, mid_, b3 = st.columns([1, 4, 1], vertical_alignment="center")
-    with b1:
-        st.button("◀ 이전", key="d16_prev", disabled=step == 0, on_click=_go, args=(step - 1,), width="stretch")
-    with mid_:
-        ui.step_chips(STEPS, step)
-    with b3:
-        st.button("다음 ▶", key="d16_next", type="primary", width="stretch",
-                  disabled=step == 2 or not st.session_state.get("d16_ran"), on_click=_go, args=(step + 1, True))
+    # 휴대폰에서는 칸이 세로로 쌓여 이전 · 단계 · 다음이 세 줄이 된다 — key로 잡아 ui.py CSS가 두 줄로 묶는다
+    with st.container(key="d16_nav"):
+        b1, mid_, b3 = st.columns([1, 4, 1], vertical_alignment="center")
+        with b1:
+            st.button("◀ 이전", key="d16_prev", disabled=step == 0, on_click=_go, args=(step - 1,), width="stretch")
+        with mid_:
+            ui.step_chips(STEPS, step)
+        with b3:
+            st.button("다음 ▶", key="d16_next", type="primary", width="stretch",
+                      disabled=step == 2 or not st.session_state.get("d16_ran"), on_click=_go, args=(step + 1, True))
     if step == 0:
         _step1(v)
     elif step == 1:
