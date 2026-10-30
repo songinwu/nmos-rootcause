@@ -4,7 +4,7 @@
 엔진 본체 · 대시보드는 비공개 저장소에 있어서, 원인 표 쪽 파일은 **읽기용**이고 혼자서는 실행되지 않아요.
 **모양 CNN 학습 코드는 여기서 그대로 돌아가요** — 아래 [모양 CNN](#모양-cnn--학습-코드-2026-10-30)을 보세요.
 
-> **최신 — 2026-10-30** · 모양 CNN 학습 코드 · 학습한 가중치 추가.
+> **최신 — 2026-10-30** · 모양 CNN 학습 코드 · 학습한 가중치 추가 · **fail 라벨을 문헌대로 다시 붙이는 계획** — [`docs/relabel_plan.md`](docs/relabel_plan.md).
 > **2026-10-28** · 41단계(38 + SAB 3) · 측정 12칸 · 「얼마나」를 말하는 원인 8개 + 결함 밀도 · 시연 웨이퍼 17장.
 > `docs/`의 PDF는 2판(38단계 · SAB 넣기 전)이에요. 그 뒤에 바뀐 점은 아래 [SAB 추가](#sab-추가-2026-10-28)를 보세요.
 
@@ -39,6 +39,7 @@
 | `src/dashboard/demo16.py` | 대시보드 섹션 16 시연 화면 (MOSCAP · CMOS · NMOS) |
 | `tests/test_rootcause_nmos.py` · `tests/test_nmos_device.py` · `tests/test_demo16_text.py` | 표 모양 · 대표 판정 · 크기 역산 · 시나리오가 엔진과 맞는지 |
 | `docs/…조원설명.pdf` | 조원 설명용 정리본 (2판) |
+| `docs/relabel_plan.md` | fail 라벨 다시 붙이기 — 지금 방식 · 바꾸는 것 · 데이터 나누기 · 문헌 말 번역 규칙 · leakage 논문 4편 (2026-10-30, 진행 중) |
 | `src/training/train_wafermap.py` | 모양 CNN — 모델 구조 · WM-811K 읽기(26×26) · 웨이퍼 단위 분할 학습 |
 | `scripts/a1b_lotwise_model.py` · `scripts/a1_lot_consistency.py` | 모양 CNN — **lot 단위 분할 학습(시연 · 엔진이 쓰는 것)** · lot 뭉침 검정 |
 | `src/inference/wafermap_predictor.py` | 학습한 CNN으로 맵 한 장 판정 |
