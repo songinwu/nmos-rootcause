@@ -231,8 +231,8 @@ def _wat_table(v):
         f'<td style="padding:3px 8px;font-weight:700;color:{"#E85D5D" if bad else ui.INK};">{now}{" ⚠" if bad else ""}</td>'
         f'<td style="padding:3px 8px;color:{ui.INK_MUTED};">{ref}</td><td style="padding:3px 8px;color:{ui.INK_MUTED};">{r}</td></tr>'
         for n, now, ref, r, bad in _wat_cells(v))
-    st.markdown(f'<table style="width:100%;border-collapse:collapse;font-size:13px;border:1px solid {ui.BORDER};">'
-                f'<tr style="color:{ui.INK_MUTED};font-size:11.5px;"><td style="padding:3px 8px;">측정</td>'
+    st.markdown(f'<table style="width:100%;border-collapse:collapse;font-size:14.5px;border:1px solid {ui.BORDER};">'
+                f'<tr style="color:{ui.INK_MUTED};font-size:13px;"><td style="padding:3px 8px;">측정</td>'
                 f'<td style="padding:3px 8px;">이번</td><td style="padding:3px 8px;">기준</td>'
                 f'<td style="padding:3px 8px;">합격선</td></tr>{rows}</table>', unsafe_allow_html=True)
 
@@ -242,7 +242,7 @@ def _wat_line(v):
     cells = _wat_cells(v)
     bad = [f'<span style="color:#E85D5D;">{n} {now}</span>' for n, now, _, _, b in cells if b]
     txt = (" · ".join(bad) + f" · 나머지 {len(cells) - len(bad)}개 정상") if bad else "전부 합격선 안"
-    st.markdown(f'<div style="font-size:12.5px;color:{ui.INK_MUTED};margin-top:2px;">WAT — {txt}</div>',
+    st.markdown(f'<div style="font-size:14px;color:{ui.INK_MUTED};margin-top:2px;">WAT — {txt}</div>',
                 unsafe_allow_html=True)
 
 
@@ -250,17 +250,17 @@ def _mag_line(r):
     """③ 엔진 칸의 「얼마나」 한 줄 — 크기를 재는 원인이면 크기 · 90% 범위 · 정상 범위 · 다른 측정과 맞나, 아니면 왜 못 재나."""
     mg = r.get("mag")
     if mg and mg.get("kind") == "density":   # 결함 밀도 — 맵의 불량 칩 비율에서 칩당 결함 수
-        return (f'<div style="color:{ui.INK_MUTED};font-size:12.5px;margin-top:3px;">얼마나 — '
+        return (f'<div style="color:{ui.INK_MUTED};font-size:14px;margin-top:3px;">얼마나 — '
                 f'<b style="color:{ui.ACCENT};font-size:14px;">{mg["label"]} 약 {mg["value"]}</b> '
                 f'<span>(90% {mg["lo"]} ~ {mg["hi"]})</span><br>웨이퍼 {mg["normal"]} · {mg["from"]}으로 계산</div>')
     if not mg:
-        return (f'<div style="color:{ui.INK_MUTED};font-size:12px;margin-top:3px;">{r.get("kind_note", "")} '
-                f'<span style="font-size:11px;">(유형: {r.get("kind", "—")})</span></div>')
+        return (f'<div style="color:{ui.INK_MUTED};font-size:13.5px;margin-top:3px;">{r.get("kind_note", "")} '
+                f'<span style="font-size:12.5px;">(유형: {r.get("kind", "—")})</span></div>')
     if not mg["out_of_range"]:
         head = f'{mg["label"]} {mg["value"]} — 정상 범위({mg["normal"]}) 안이라 이 파라미터는 아니에요'
-        return f'<div style="color:{ui.INK_MUTED};font-size:12.5px;margin-top:3px;">얼마나 — {head}</div>'
+        return f'<div style="color:{ui.INK_MUTED};font-size:14px;margin-top:3px;">얼마나 — {head}</div>'
     cons = ("다른 측정도 맞아요 ✓" if mg["consistent"] else f'안 맞는 측정 — {" · ".join(mg["mismatch"])} ✗')
-    return (f'<div style="color:{ui.INK_MUTED};font-size:12.5px;margin-top:3px;">얼마나 — '
+    return (f'<div style="color:{ui.INK_MUTED};font-size:14px;margin-top:3px;">얼마나 — '
             f'<b style="color:{ui.ACCENT};font-size:14px;">{mg["label"]} 약 {mg["value"]}</b> '
             f'<span>(90% {mg["lo"]} ~ {mg["hi"]})</span><br>정상 {mg["normal"]} 밖 · {mg["from"]} 값으로 계산 · {cons}</div>')
 
@@ -273,33 +273,51 @@ def _banner(v):
     head, sub = v["banner"]
     st.markdown(
         f'<div style="background:{ui.SURFACE};border:1px solid {ui.BORDER};border-radius:10px;padding:8px 14px;'
-        f'margin:2px 0 8px;"><span style="color:{ui.INK_MUTED};font-size:12px;">이 웨이퍼는 무엇을 만드나 · </span>'
+        f'margin:2px 0 8px;"><span style="color:{ui.INK_MUTED};font-size:13.5px;">이 웨이퍼는 무엇을 만드나 · </span>'
         f'<span style="color:{ui.INK};font-size:16px;font-weight:700;">{head}</span>'
-        f'<div style="color:{ui.INK_MUTED};font-size:12.5px;margin-top:2px;">{sub}</div></div>',
+        f'<div style="color:{ui.INK_MUTED};font-size:14px;margin-top:2px;">{sub}</div></div>',
         unsafe_allow_html=True)
 
 
 def _map(v, key, binned=True):
-    """binned=False면 ① 단계용 — 검사 결과를 감추고 합격/불합격만(CNN이 보는 그대로)."""
+    """binned=False면 ① 단계용 — 검사 결과를 감추고 합격/불합격만(CNN이 보는 그대로).
+
+    *(2026-10-30)* 칸이 많은 NMOS(12칸)는 색 12개가 섞이면 무늬가 안 보여서, ui.bin_wafer_map과 같은 원칙으로
+    **가장 많은 측정 하나만 그 색으로 강조**하고 나머지 불량은 회색으로 누른다. 칸별 비율은 옆 막대가 보여 준다.
+    맵마다 범례를 붙인다 — 색만으로는 무엇이 합격인지 알 수 없어서다."""
     die = np.asarray(v["die_map"])
+    names = {0: "웨이퍼 밖", 1: "합격"}
     if binned:
-        cols = [ui.BG, ui.STEEL] + list(_colors(v))
-        names = {0: "웨이퍼 밖", 1: "합격"} | {i + 2: v["bin_plain"][b] for i, b in enumerate(v["bins"])}
+        names |= {i + 2: v["bin_plain"][b] for i, b in enumerate(v["bins"])}
+        text = [[names.get(int(x), "") for x in row] for row in die]
+        colors = dict(zip(v["bins"], _colors(v)))
+        if len(v["bins"]) > 4:
+            dom = max(v["bins"], key=lambda b: v["counts"][b])
+            code = 2 + v["bins"].index(dom)
+            z = np.where(die <= 1, die, np.where(die == code, 3, 2))
+            cols = [ui.BG, ui.STEEL, ui.OTHER_FAIL, colors[dom]]
+            legend = [(ui.STEEL, "합격"), (colors[dom], f"{v['bin_plain'][dom]} (가장 많은 측정)"), (ui.OTHER_FAIL, "그 밖 불량")]
+        else:
+            z = die
+            cols = [ui.BG, ui.STEEL] + list(_colors(v))
+            legend = [(ui.STEEL, "합격")] + [(colors[b], v["bin_plain"][b]) for b in v["bins"]]
     else:
-        die = np.minimum(die, 2)
+        z = np.minimum(die, 2)
+        names[2] = "불합격"
+        text = [[names.get(int(x), "") for x in row] for row in z]
         cols = [ui.BG, ui.STEEL, ui.ACCENT]
-        names = {0: "웨이퍼 밖", 1: "합격", 2: "불합격"}
+        legend = [(ui.STEEL, "합격"), (ui.ACCENT, "불합격")]
     n = len(cols)
     scale = []
     for i, c in enumerate(cols):
         scale += [[i / n, c], [(i + 1) / n, c]]
-    text = [[names.get(int(x), "") for x in row] for row in die]
-    fig = go.Figure(go.Heatmap(z=die, text=text, colorscale=scale, zmin=-0.5, zmax=n - 0.5, showscale=False,
+    fig = go.Figure(go.Heatmap(z=z, text=text, colorscale=scale, zmin=-0.5, zmax=n - 0.5, showscale=False,
                                xgap=1.2, ygap=1.2, hovertemplate="%{text}<extra></extra>"))
-    fig.update_layout(**ui._base_layout(height=285, xaxis=dict(visible=False, scaleanchor="y"),
+    fig.update_layout(**ui._base_layout(height=295, xaxis=dict(visible=False, scaleanchor="y"),
                                         yaxis=dict(visible=False, autorange="reversed"),
                                         margin=dict(l=2, r=2, t=2, b=2)))
     st.plotly_chart(fig, width="stretch", config=ui._PLOTLY_CONFIG, key=key)
+    ui.swatch_legend(legend)
 
 
 def _bins(v, key, top=None):
@@ -318,12 +336,12 @@ def _bins(v, key, top=None):
         x=[n / tot * 100 for _, n, _ in rows], y=[lab for lab, _, _ in rows], orientation="h",
         marker_color=[c for _, _, c in rows],
         text=[f"{n / tot * 100:.0f}%" for _, n, _ in rows], textposition="outside", hoverinfo="skip"))
-    fig.update_layout(**ui._base_layout(height=max(128, 23 * len(rows) + 10), margin=dict(l=2, r=6, t=2, b=2),
+    fig.update_layout(**ui._base_layout(height=max(140, 26 * len(rows) + 12), margin=dict(l=2, r=6, t=2, b=2),
                                         xaxis=dict(visible=False, range=[0, 125]),
-                                        yaxis=dict(tickfont=dict(size=12.5)), bargap=0.25))
+                                        yaxis=dict(tickfont=dict(size=14)), bargap=0.25))
     st.plotly_chart(fig, width="stretch", config=ui._PLOTLY_CONFIG, key=key)
     dom = max(v["bins"], key=lambda b: cnt[b])
-    st.markdown(f'<div style="font-size:12.5px;color:{ui.INK_MUTED};margin-top:-6px;">불량 {tot}칸 중 {_most(cnt[dom], tot)} '
+    st.markdown(f'<div style="font-size:14px;color:{ui.INK_MUTED};margin-top:-6px;">불량 {tot}칸 중 {_most(cnt[dom], tot)} '
                 f'<b style="color:{col[dom]};">{v["bin_plain"][dom]}</b> · '
                 f'{v["bin_test"][dom]}</div>', unsafe_allow_html=True)
 
@@ -340,14 +358,14 @@ def _prob(v, key):
         x=[x for _, x in items], y=[PAT_KO.get(p, p) for p, _ in items], orientation="h",
         marker_color=[ui.ACCENT if p == top else ui.STEEL for p, _ in items],
         text=[f"{x:.1f}%" for _, x in items], textposition="outside", hoverinfo="skip"))
-    fig.update_layout(**ui._base_layout(height=120, margin=dict(l=2, r=6, t=2, b=2),
+    fig.update_layout(**ui._base_layout(height=132, margin=dict(l=2, r=6, t=2, b=2),
                                         xaxis=dict(visible=False, range=[0, 125]),
-                                        yaxis=dict(tickfont=dict(size=12.5)), bargap=0.3))
+                                        yaxis=dict(tickfont=dict(size=14)), bargap=0.3))
     st.plotly_chart(fig, width="stretch", config=ui._PLOTLY_CONFIG, key=key)
 
 
 def _flow_groups(v):
-    """NMOS 38단계 — 공정 묶음 7개, 묶음마다 단계 칩. 의심 단계 칩에 불, 의심이 없는 묶음은 흐리게."""
+    """NMOS 41단계 — 공정 묶음 7개, 묶음마다 단계 칩. 의심 단계 칩에 불, 의심이 없는 묶음은 흐리게."""
     hi = {}
     for r in v["ranking"]:
         for k in r["steps"]:
@@ -363,20 +381,20 @@ def _flow_groups(v):
             if r:
                 col = RANK_COLOR[min(r["rank"] - 1, 2)]
                 chips.append(f'<span style="border:2px solid {col};background:#1E2632;color:{ui.INK};font-weight:700;'
-                             f'font-size:12.5px;padding:1px 7px;border-radius:7px;margin:2px 3px 2px 0;display:inline-block;">'
-                             f'{_n(k)}. {name[k]} <span style="background:{col};color:#0D1319;font-size:10.5px;'
+                             f'font-size:14px;padding:1px 7px;border-radius:7px;margin:2px 3px 2px 0;display:inline-block;">'
+                             f'{_n(k)}. {name[k]} <span style="background:{col};color:#0D1319;font-size:12px;'
                              f'padding:0 5px;border-radius:8px;">{_rank_label(r)}</span></span>')
             else:
-                chips.append(f'<span style="color:{ui.INK_MUTED};font-size:11.5px;padding:0 3px;margin:1px 2px 1px 0;'
+                chips.append(f'<span style="color:{ui.INK_MUTED};font-size:13px;padding:0 3px;margin:1px 2px 1px 0;'
                              f'display:inline-block;">{_n(k)} {name[k]}</span>')
         dim = "" if lit else "opacity:.55;"
         out.append(f'<div style="border-left:2px solid {RANK_COLOR[0] if lit else ui.BORDER};padding:2px 0 3px 8px;'
-                   f'margin:3px 0;{dim}"><div style="color:{ui.INK};font-size:12.5px;font-weight:600;">{g} '
-                   f'<span style="color:{ui.INK_MUTED};font-weight:400;font-size:11px;">{_n(a)}{f"–{_n(b)}" if b != a else ""}</span></div>'
+                   f'margin:3px 0;{dim}"><div style="color:{ui.INK};font-size:14px;font-weight:600;">{g} '
+                   f'<span style="color:{ui.INK_MUTED};font-weight:400;font-size:12.5px;">{_n(a)}{f"–{_n(b)}" if b != a else ""}</span></div>'
                    f'<div style="line-height:1.55;">{"".join(chips)}</div></div>')
     if not v["ranking"][0]["steps"]:
-        out.append(f'<div style="color:{ui.INK_MUTED};font-size:12px;">1순위는 특정 단계가 아니라 전 공정 공통이에요.</div>')
-    st.markdown(f'<div style="color:{ui.INK_MUTED};font-size:12.5px;margin-bottom:2px;">만드는 순서 {len(v["flow"])}단계 — '
+        out.append(f'<div style="color:{ui.INK_MUTED};font-size:13.5px;">1순위는 특정 단계가 아니라 전 공정 공통이에요.</div>')
+    st.markdown(f'<div style="color:{ui.INK_MUTED};font-size:14px;margin-bottom:2px;">만드는 순서 {len(v["flow"])}단계 — '
                 f'의심 단계에 불이 들어와요</div>' + "".join(out), unsafe_allow_html=True)
 
 
@@ -397,16 +415,16 @@ def _flow(v):
             skip = "" if (done or "안 함" in desc) else " · 실습에서 안 함"
             rows.append(
                 f'<div style="border:2px solid {col};background:#1E2632;border-radius:7px;padding:4px 9px;margin:3px 0;">'
-                f'<div style="color:{ui.INK};font-size:13.5px;font-weight:700;">{num}. {name} '
-                f'<span style="background:{col};color:#0D1319;font-size:11px;padding:0 6px;border-radius:9px;">'
+                f'<div style="color:{ui.INK};font-size:15px;font-weight:700;">{num}. {name} '
+                f'<span style="background:{col};color:#0D1319;font-size:12.5px;padding:0 6px;border-radius:9px;">'
                 f'{_rank_label(r)}</span></div>'
-                f'<div style="color:{ui.INK_MUTED};font-size:11.5px;line-height:1.35;">{desc}{skip}</div></div>')
+                f'<div style="color:{ui.INK_MUTED};font-size:13px;line-height:1.35;">{desc}{skip}</div></div>')
         else:
             style = "" if done else "opacity:.5;"
-            tag = "" if done else f' <span style="font-size:10.5px;border:1px dashed {ui.INK_MUTED};padding:0 4px;border-radius:5px;">실습에서 안 함</span>'
-            rows.append(f'<div title="{desc}" style="color:{ui.INK};font-size:13px;padding:3px 9px;margin:1px 0;'
+            tag = "" if done else f' <span style="font-size:12px;border:1px dashed {ui.INK_MUTED};padding:0 4px;border-radius:5px;">실습에서 안 함</span>'
+            rows.append(f'<div title="{desc}" style="color:{ui.INK};font-size:14.5px;padding:3px 9px;margin:1px 0;'
                         f'border-left:2px solid {ui.BORDER};{style}">{num}. {name}{tag}</div>')
-    st.markdown(f'<div style="color:{ui.INK_MUTED};font-size:12.5px;margin-bottom:2px;">만드는 순서 — 의심 공정에 불이 들어와요</div>'
+    st.markdown(f'<div style="color:{ui.INK_MUTED};font-size:14px;margin-bottom:2px;">만드는 순서 — 의심 공정에 불이 들어와요</div>'
                 + "".join(rows), unsafe_allow_html=True)
 
 
@@ -436,14 +454,14 @@ def _why_dialog(world, sid):
         rows = "".join(
             f'<tr style="{"background:#1E2A22;" if f["explains"] else ""}">'
             f'<td style="padding:4px 8px;">{f["label"]}</td>'
-            f'<td style="padding:4px 8px;"><b>{f["value"]}</b> <span style="color:{ui.INK_MUTED};font-size:11.5px;">'
+            f'<td style="padding:4px 8px;"><b>{f["value"]}</b> <span style="color:{ui.INK_MUTED};font-size:13px;">'
             f'({f["lo"]} ~ {f["hi"]})</span></td>'
             f'<td style="padding:4px 8px;color:{ui.INK_MUTED};">{f["normal"]}</td>'
             f'<td style="padding:4px 8px;">{"밖" if f["out_of_range"] else "안"}</td>'
             f'<td style="padding:4px 8px;">{"✓ 맞음" if f["consistent"] else "✗ " + " · ".join(f["mismatch"])}</td></tr>'
             for f in v["fingerprint"])
-        st.markdown(f'<table style="width:100%;border-collapse:collapse;font-size:13px;">'
-                    f'<tr style="color:{ui.INK_MUTED};font-size:11.5px;"><td style="padding:4px 8px;">파라미터</td>'
+        st.markdown(f'<table style="width:100%;border-collapse:collapse;font-size:14.5px;">'
+                    f'<tr style="color:{ui.INK_MUTED};font-size:13px;"><td style="padding:4px 8px;">파라미터</td>'
                     f'<td style="padding:4px 8px;">이번 값으로 계산한 크기 (90%)</td><td style="padding:4px 8px;">정상 범위</td>'
                     f'<td style="padding:4px 8px;">범위</td><td style="padding:4px 8px;">다른 측정과</td></tr>{rows}</table>',
                     unsafe_allow_html=True)
@@ -529,20 +547,20 @@ def _engine(v):
     blocks = []
     for r in top_group:
         blocks.append(
-            f'<div style="color:{col};font-size:13.5px;font-weight:700;margin-top:6px;">{_rank_label(r)} · 공정 「{r["step_name"]}」</div>'
+            f'<div style="color:{col};font-size:15px;font-weight:700;margin-top:6px;">{_rank_label(r)} · 공정 「{r["step_name"]}」</div>'
             f'<div style="color:{ui.INK};font-size:{17 if len(top_group) > 1 else 18}px;font-weight:700;line-height:1.35;margin:2px 0 4px;">'
             f'{r["suspect"]}</div>'
-            f'<div style="color:{ui.INK_MUTED};font-size:12.5px;">정상이면 — <span style="color:{ui.INK};">{r["normal"]}</span></div>'
-            f'<div style="color:{ui.INK_MUTED};font-size:12.5px;margin-top:2px;">먼저 확인할 것 — '
+            f'<div style="color:{ui.INK_MUTED};font-size:14px;">정상이면 — <span style="color:{ui.INK};">{r["normal"]}</span></div>'
+            f'<div style="color:{ui.INK_MUTED};font-size:14px;margin-top:2px;">먼저 확인할 것 — '
             f'<span style="color:{ui.INK};">{" · ".join(r["checks"])}</span></div>'
             + (_mag_line(r) if v["world"] == "nmos" else ""))
     st.markdown(
         f'<div style="border:1px solid {ui.BORDER};background:{ui.SURFACE};border-radius:10px;padding:8px 14px 10px;">'
-        f'<div style="color:{ui.INK_MUTED};font-size:12.5px;">③ 엔진이 말하는 것</div>'
+        f'<div style="color:{ui.INK_MUTED};font-size:14px;">③ 엔진이 말하는 것</div>'
         + f'<div style="border-top:1px dashed {ui.BORDER};margin-top:8px;"></div>'.join(blocks) + '</div>',
         unsafe_allow_html=True)
     st.markdown("".join(
-        f'<div style="border-left:3px solid {RANK_COLOR[min(r["rank"] - 1, 2)]};padding:2px 9px;margin:5px 0;font-size:13px;">'
+        f'<div style="border-left:3px solid {RANK_COLOR[min(r["rank"] - 1, 2)]};padding:2px 9px;margin:5px 0;font-size:14.5px;">'
         f'<b style="color:{RANK_COLOR[min(r["rank"] - 1, 2)]};">{_rank_label(r)}</b>'
         f'<span style="color:{ui.INK_MUTED};"> · {r["step_name"]} — </span>'
         f'<span style="color:{ui.INK};">{r["suspect"]}</span></div>' for r in rest), unsafe_allow_html=True)
@@ -677,14 +695,14 @@ def _step3(v):
     left, mid, right = st.columns([1.0, 0.82, 1.18], gap="medium")
     with left:
         top, conf, nxt = v["cnn"]
-        st.markdown(f'<div style="font-size:13px;color:{ui.INK_MUTED};">① 모양 — CNN 판정 '
+        st.markdown(f'<div style="font-size:14.5px;color:{ui.INK_MUTED};">① 모양 — CNN 판정 '
                     f'<b style="color:{ui.INK};font-size:16px;">{PAT_KO.get(top, top)} {conf:.0f}%</b>'
                     f' · 그다음 {" · ".join(f"{PAT_KO.get(p, p)} {x:.0f}%" for p, x in nxt)}</div>',
                     unsafe_allow_html=True)
         _map(v, key="d16_map")
         rule = v.get("bin_rule", "검사 순서대로 처음 걸린 것")
-        st.markdown(f'<div style="font-size:13px;color:{ui.INK_MUTED};margin-top:-4px;">② 무엇으로 떨어졌나 '
-                    f'<span style="font-size:11.5px;">({rule})</span></div>', unsafe_allow_html=True)
+        st.markdown(f'<div style="font-size:14.5px;color:{ui.INK_MUTED};margin-top:-4px;">② 무엇으로 떨어졌나 '
+                    f'<span style="font-size:13px;">({rule})</span></div>', unsafe_allow_html=True)
         _bins(v, key="d16_bins", top=4)
         if v["world"] == "nmos" and v.get("wat"):
             _wat_line(v)
@@ -731,7 +749,7 @@ def render_demo16():
                                 d16_ran=step0 > 0)
     step = st.session_state["d16_step"]
 
-    st.markdown(f'<div style="color:{ui.INK_MUTED};font-size:13px;margin:-8px 0 4px;">{v["story"]}</div>',
+    st.markdown(f'<div style="color:{ui.INK_MUTED};font-size:14.5px;margin:-8px 0 4px;">{v["story"]}</div>',
                 unsafe_allow_html=True)
     _banner(v)
     # 이전 · 다음은 단계 표시줄과 한 줄에 둔다 — ③은 화면이 길어 아래에 두면 발표 중에 스크롤해야 한다
