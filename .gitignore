@@ -2,5 +2,9 @@ __pycache__/
 *.pyc
 data/raw/
 data/processed/
-models/
+models/*
+!models/wafermap/
+models/wafermap/*
+!models/wafermap/wafermap_cnn.pt
+!models/wafermap/wafermap_cnn_lotwise.pt
 outputs/
