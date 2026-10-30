@@ -6,7 +6,7 @@
 
 > **최신 — 2026-10-30** · **fail 라벨을 문헌대로 다시 붙였어요** — 원인 40 → 39, 주 fail 50%, 시험용 lot 맵만으로 다시 시험 ([결과 1](#결과-1--어느-단계를-바로-짚나-합성-시험-n-1) · [`docs/relabel_plan.md`](docs/relabel_plan.md)) · 모양 CNN 학습 코드 · 가중치 추가.
 > **2026-10-28** · 41단계(38 + SAB 3) · 측정 12칸 · 「얼마나」를 말하는 원인 8개 + 결함 밀도 · 시연 웨이퍼 17장.
-> `docs/`의 PDF는 2판(38단계 · SAB 넣기 전)이에요. 그 뒤에 바뀐 점은 아래 [SAB 추가](#sab-추가-2026-10-28)를 보세요.
+> `docs/`의 조원 설명 PDF는 **3판(2026-10-30 — 41단계 · 측정 12칸 · 원인 39개)**이고, 파라미터 범위 근거 PDF도 같이 있어요.
 
 ## 무엇을 했나
 
@@ -25,7 +25,8 @@
 1. 이 README
 2. [`src/inference/rootcause_kb_nmos.py`](src/inference/rootcause_kb_nmos.py) — 41단계(`STEPS`)와 원인 39개(`CAUSES`) · fail 근거(`FAIL_EVIDENCE`)
 3. [`src/inference/nmos_device.py`](src/inference/nmos_device.py) — 「얼마나」 식 · 기준값 · 합격선 · 불량 경계 (맨 위 설명에 출처)
-4. [`docs/NMOS_원인공정_지식표_조원설명.pdf`](docs/NMOS_원인공정_지식표_조원설명.pdf) — 단계 · 측정 · 연결표 · 근거 (2판, 38단계 기준)
+4. [`docs/NMOS_원인공정_지식표_조원설명.pdf`](docs/NMOS_원인공정_지식표_조원설명.pdf) — 41단계 · 측정 12칸 · 연결표 · fail 근거 · 시험 결과 · 시연 17장 (3판)
+5. [`docs/NMOS_파라미터범위_근거.pdf`](docs/NMOS_파라미터범위_근거.pdf) — 파라미터 범위 7개를 어떻게 정했나 · 기준값 · 합격선 · 식의 출처
 
 ## 파일
 
@@ -39,7 +40,8 @@
 | `data/demo/nmos_scenarios.json` | 위 스크립트가 만든 결과 |
 | `src/dashboard/demo16.py` | 대시보드 섹션 16 시연 화면 (MOSCAP · CMOS · NMOS) |
 | `tests/test_rootcause_nmos.py` · `tests/test_nmos_device.py` · `tests/test_demo16_text.py` | 표 모양 · 대표 판정 · 크기 역산 · 시나리오가 엔진과 맞는지 |
-| `docs/…조원설명.pdf` | 조원 설명용 정리본 (2판) |
+| `docs/…조원설명.pdf` | 조원 설명용 정리본 (3판, 19쪽) |
+| `docs/NMOS_파라미터범위_근거.pdf` | 파라미터 범위 근거 (11쪽) |
 | `docs/relabel_plan.md` | fail 라벨 다시 붙이기 — 예전 방식 · 바꾼 것 · 데이터 나누기 · 문헌 말 번역 규칙 · leakage 논문 4편 · 원인별 fail 근거 (2026-10-30) |
 | `src/training/train_wafermap.py` | 모양 CNN — 모델 구조 · WM-811K 읽기(26×26) · 웨이퍼 단위 분할 학습 |
 | `scripts/a1b_lotwise_model.py` · `scripts/a1_lot_consistency.py` | 모양 CNN — **lot 단위 분할 학습(시연 · 엔진이 쓰는 것)** · lot 뭉침 검정 |
@@ -258,4 +260,4 @@ metal 끊김).
 - **사고가 둘 겹치면 「얼마나」 역산이 틀려요.** 그래서 「다른 측정과 맞나」를 같이 봐요.
 - **사고가 겹치면 크기는 말하지 않아요.** 경고만 하고, 후보 단계들의 기록을 같이 보라고 해요.
 - **아직 안 한 것** — SAB 단계의 사고, 흩어짐(클린룸) · 긁힘(곡선 vs 직선) · 접합 누설(STI 모서리 — 원문 찾는 중) ·
-  정상 웨이퍼 시연, PDF 3판, IDDQ에서만 걸린 칩을 뜯어본 원문(Nigh et al., ITC 1998).
+  정상 웨이퍼 시연, IDDQ에서만 걸린 칩을 뜯어본 원문(Nigh et al., ITC 1998).
